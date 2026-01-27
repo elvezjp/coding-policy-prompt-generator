@@ -1,0 +1,2 @@
+[console_scripts]
+coding-policy-prompt-generator = coding_policy_prompt_generator.cli:main
