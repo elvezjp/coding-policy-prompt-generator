@@ -279,7 +279,7 @@ Issues and Pull Requests are welcome.
 
 ## Background
 
-This tool was born as part of a family of verification utilities created during the development of the IXV AI assistant. It focuses on the pre-processing step of turning **Excel policies into AI-executable definitions**.
+This tool originated as one of a set of verification utilities created during the development of the IXV AI assistant. Its role is the pre-processing step of turning **Excel-based coding policies into AI-executable definitions**.
 
 ---
 
