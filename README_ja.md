@@ -1,5 +1,11 @@
 # coding-policy-prompt-generator
 
+[English](./README.md) | [日本語](./README_ja.md)
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+[![Python](https://img.shields.io/badge/Python-3.9%2B-3776AB.svg?logo=python&logoColor=white)](https://www.python.org/)
+[![uv](https://img.shields.io/badge/uv-recommended-5C2D91.svg)](https://docs.astral.sh/uv/)
+
 Excel形式の「コーディング規約（1行＝1ルール）」から、**AIオーディター向けのプロンプト（System Prompt）**をルール単位で自動生成し、Excel内の「詳細シート」に展開するCLIツールです（これから実装していく段階の設計ドキュメントも兼ねています）。
 
 - 入力：コーディング規約Excel（例：1シート目にルール一覧、右端列に「詳細リンク」列）
