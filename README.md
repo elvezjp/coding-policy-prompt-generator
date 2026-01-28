@@ -49,6 +49,7 @@ IXV addresses challenges in understanding, structuring, and utilizing Japanese d
 - [CONTRIBUTING.md](CONTRIBUTING.md) - Contribution guide
 - [SECURITY.md](SECURITY.md) - Security policy
 - [spec.md](spec.md) - Technical specification
+- [Sample Files](docs/ai-auditor-format/) - Sample Excel (input/output)
 
 ---
 
