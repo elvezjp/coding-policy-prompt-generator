@@ -1,33 +1,33 @@
-# Changelog
+# 変更履歴
 
-All notable changes to this project will be documented in this file.
+このプロジェクトにおける注目すべき変更はすべてこのファイルに記録されます。
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+このファイルの形式は [Keep a Changelog](https://keepachangelog.com/ja/1.0.0/) に基づいており、
+このプロジェクトは [セマンティックバージョニング](https://semver.org/lang/ja/) に準拠しています。
 
 ## [Unreleased]
 
-### Added
+### 追加
 
-- Initial CLI implementation (`coding-policy-prompt-generator`) for converting Excel-based coding policies to AI auditor prompts
-- Column resolution with NFC normalization and relaxed matching for Japanese header variations
-- Idempotent detail sheet handling with rule ID markers to prevent data loss on re-runs
-- Sheet name collision safety with automatic suffix generation
-- `--dry-run` option for previewing changes without modifying files
-- Jinja2-based `--template` support for custom prompt templates
-- Comprehensive test suite covering:
-  - Skip rules for empty/incomplete rows
-  - NFC normalization for Japanese text
-  - Sheet name collisions
-  - Column resolution edge cases
+- Excelベースのコーディング規約をAIオーディター向けプロンプトに変換する初期CLI実装（`coding-policy-prompt-generator`）
+- 日本語ヘッダーの揺れに対応したNFC正規化と柔軟なマッチングによる列解決機能
+- ルールIDマーカーによる冪等な詳細シート処理（再実行時のデータ損失を防止）
+- 自動サフィックス生成によるシート名衝突の安全対策
+- ファイルを変更せずに変更内容をプレビューする `--dry-run` オプション
+- カスタムプロンプトテンプレート用のJinja2ベース `--template` サポート
+- 以下をカバーする包括的なテストスイート：
+  - 空行・不完全な行のスキップルール
+  - 日本語テキストのNFC正規化
+  - シート名の衝突
+  - 列解決のエッジケース
 
-### Technical Details
+### 技術詳細
 
-- Uses `openpyxl` for Excel file manipulation
-- Supports Python 3.9+
-- Package management via `uv`
+- Excelファイル操作に `openpyxl` を使用
+- Python 3.9+ をサポート
+- `uv` によるパッケージ管理
 
-## Links
+## リンク
 
-- Repository: https://github.com/elvez-inc/coding-policy-prompt-generator
-- Issue Tracker: https://github.com/elvez-inc/coding-policy-prompt-generator/issues
+- リポジトリ: https://github.com/elvez-inc/coding-policy-prompt-generator
+- Issue トラッカー: https://github.com/elvez-inc/coding-policy-prompt-generator/issues
