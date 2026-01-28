@@ -118,6 +118,16 @@ uv run coding-policy-prompt-generator rules.xlsx \
 uv run coding-policy-prompt-generator rules.xlsx --dry-run
 ```
 
+#### 6) サンプルファイルで実行
+
+```bash
+uv run coding-policy-prompt-generator \
+  docs/ai-auditor-format/20260121AIオーディター形式サンプルコーディング規約.xlsx \
+  --index-sheet "コーディング規約一覧" \
+  --header-row 3 \
+  --link-column "説明"
+```
+
 ---
 
 ## 主要オプション
@@ -179,6 +189,8 @@ N-001
   "reason": "日本語で簡潔に"
 }
 ```
+
+> 注: 内蔵テンプレートは日本語でプロンプトを生成します。他の言語を使用する場合は `--template` でカスタムテンプレートを指定してください。
 
 ---
 

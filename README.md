@@ -118,6 +118,16 @@ uv run coding-policy-prompt-generator rules.xlsx \
 uv run coding-policy-prompt-generator rules.xlsx --dry-run
 ```
 
+#### 6) Run with sample file
+
+```bash
+uv run coding-policy-prompt-generator \
+  docs/ai-auditor-format/20260121AIオーディター形式サンプルコーディング規約.xlsx \
+  --index-sheet "コーディング規約一覧" \
+  --header-row 3 \
+  --link-column "説明"
+```
+
 ---
 
 ## Main Options
@@ -158,27 +168,29 @@ The tool creates one sheet per rule and writes the prompt body starting at cell 
 - Example sheet names: `PROMPT_N-001` / `PROMPT_001`
 
 ```text
-[SYSTEM PROMPT]
+【SYSTEM PROMPT】
 
-You are an AI auditor that reviews software code.
-Evaluate the code using only the following rule.
+あなたはソフトウェアコードを監査するAIオーディターです。
+以下のルールにのみ基づいてコードを評価してください。
 
-[Rule ID]
+【ルールID】
 N-001
 
-[Rule Summary]
+【ルール概要】
 (Content from the "Summary" column in Excel)
 
-[Notes]
+【補足】
 (Content from the "Description" column in Excel)
 
-[Output Format]
+【出力形式】
 {
   "rule_id": "N-001",
   "result": "OK | NG",
-  "reason": "Brief explanation"
+  "reason": "日本語で簡潔に"
 }
 ```
+
+> Note: The built-in template generates prompts in Japanese. Use `--template` to specify a custom template for other languages.
 
 ---
 
