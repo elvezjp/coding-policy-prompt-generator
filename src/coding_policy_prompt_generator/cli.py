@@ -32,6 +32,16 @@ def build_parser() -> argparse.ArgumentParser:
         default="json",
         help="Output format hint (reserved for future use; default: json)",
     )
+    parser.add_argument(
+        "--strictness",
+        choices=["strict", "lenient"],
+        default="strict",
+        help="Judgement strictness (default: strict)",
+    )
+    parser.add_argument(
+        "--project-context",
+        help='Project context string (e.g., "Java 17, Spring Boot 3.x")',
+    )
 
     return parser
 
@@ -64,6 +74,12 @@ def main(argv: list[str] | None = None) -> int:
     if args.output_format and args.output_format != "json":
         print("Note: --output-format is reserved for future use in MVP.", file=sys.stderr)
 
+    project_context = None
+    if args.project_context is not None:
+        normalized = args.project_context.strip()
+        if normalized:
+            project_context = normalized
+
     try:
         plan = generate_prompts(
             input_path=input_path,
@@ -74,6 +90,8 @@ def main(argv: list[str] | None = None) -> int:
             sheet_prefix=args.sheet_prefix,
             dry_run=args.dry_run,
             template_path=Path(args.template) if args.template else None,
+            strictness=args.strictness,
+            project_context=project_context,
         )
     except Exception as exc:  # pragma: no cover - exercised in error scenarios
         print(f"Error: {exc}", file=sys.stderr)
