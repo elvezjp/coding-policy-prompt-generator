@@ -7,7 +7,7 @@ from typing import Dict, List, Optional, Tuple
 from unicodedata import normalize as unicode_normalize
 
 from openpyxl import load_workbook
-from openpyxl.styles import Alignment
+from openpyxl.styles import Alignment, Font
 from openpyxl.workbook.workbook import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
 
@@ -305,7 +305,10 @@ def _process_rows(
         detail_cell.alignment = Alignment(wrap_text=True, vertical="top")
         detail_ws.column_dimensions["A"].width = 80
 
-        worksheet.cell(row=row_idx, column=resolved.link_col).value = _hyperlink_formula(sheet_name)
+        link_cell = worksheet.cell(row=row_idx, column=resolved.link_col)
+        link_cell.hyperlink = None  # Clear existing hyperlink
+        link_cell.value = _hyperlink_formula(sheet_name)
+        link_cell.font = Font(color="0000FF", underline="single")  # Blue, underlined
 
         plan.processed_rules += 1
         plan.actions.append(PlanAction(kind=action_kind, row=row_idx, rule_id=rule_id, sheet_name=sheet_name))
