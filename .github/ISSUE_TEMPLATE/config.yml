@@ -1,5 +1,0 @@
-blank_issues_enabled: false
-contact_links:
-  - name: Security vulnerability report
-    url: mailto:info@elvez.co.jp?subject=%5BSECURITY%5D%20coding-policy-prompt-generator
-    about: Please report security issues privately via email.
