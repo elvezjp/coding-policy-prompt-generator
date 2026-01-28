@@ -7,6 +7,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)](./LICENSE)
 [![Python](https://img.shields.io/badge/Python-3.9+-blue?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
 [![uv](https://img.shields.io/badge/uv-recommended-5C2D91?style=flat-square)](https://docs.astral.sh/uv/)
+[![Stars](https://img.shields.io/github/stars/elvezjp/coding-policy-prompt-generator?style=social)](https://github.com/elvezjp/coding-policy-prompt-generator/stargazers)
 
 A CLI tool that reads an Excel-based coding policy (1 row = 1 rule), automatically generates **rule-level prompts (System Prompts) for an AI auditor**, and expands them into "detail sheets" inside the same workbook.
 

@@ -7,6 +7,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)](./LICENSE)
 [![Python](https://img.shields.io/badge/Python-3.9+-blue?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
 [![uv](https://img.shields.io/badge/uv-recommended-5C2D91?style=flat-square)](https://docs.astral.sh/uv/)
+[![Stars](https://img.shields.io/github/stars/elvezjp/coding-policy-prompt-generator?style=social)](https://github.com/elvezjp/coding-policy-prompt-generator/stargazers)
 
 Excel形式の「コーディング規約（1行＝1ルール）」から、**AIオーディター向けのプロンプト（System Prompt）** をルール単位で自動生成し、Excel内の「詳細シート」に展開するCLIツールです。
 
