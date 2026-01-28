@@ -2,53 +2,51 @@
 
 [English](./README.md) | [日本語](./README_ja.md)
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
-[![Python](https://img.shields.io/badge/Python-3.9%2B-3776AB.svg?logo=python&logoColor=white)](https://www.python.org/)
-[![uv](https://img.shields.io/badge/uv-recommended-5C2D91.svg)](https://docs.astral.sh/uv/)
+[![Elvez](https://img.shields.io/badge/Elvez-Product-3F61A7?style=flat-square)](https://elvez.co.jp/)
+[![IXV Ecosystem](https://img.shields.io/badge/IXV-Ecosystem-3F61A7?style=flat-square)](https://elvez.co.jp/ixv/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)](./LICENSE)
+[![Python](https://img.shields.io/badge/Python-3.9+-blue?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
+[![uv](https://img.shields.io/badge/uv-recommended-5C2D91?style=flat-square)](https://docs.astral.sh/uv/)
 
-A CLI tool that reads an Excel-based coding policy (1 row = 1 rule), automatically generates **rule-level prompts (System Prompts) for an AI auditor**, and expands them into “detail sheets” inside the same workbook. This README also serves as a design-and-usage document.
-
-- Input: a coding policy workbook (for example, the first sheet is the rule index, and the rightmost column is a “detail link” column)
-- Output: one detail sheet per rule (prompt body) + hyperlinks from the rule index to each detail sheet
-
-> Goal: **preserve Excel-native workflows while converting policies into executable definitions for AI auditing.**
+A CLI tool that reads an Excel-based coding policy (1 row = 1 rule), automatically generates **rule-level prompts (System Prompts) for an AI auditor**, and expands them into "detail sheets" inside the same workbook.
 
 ---
 
-## Current Status
+## Use Cases
 
-- This repository is implemented through **M4 (template / dry-run)**
-- As of **January 27, 2026**, both `src/` and `pyproject.toml` are present
-- Some CLI options are still future-facing / MVP-external (for example, `--output-format`)
+- **Automated Code Review**: Feed coding policies into AI for automated review and auditing
+- **Rules as Data**: Manage rules as structured data (not just prose) with AI execution definitions
+- **End-to-End Pipeline**: Automate the conversion from policy (Excel) to prompt (System) to audit result (JSON)
+- **AI Auditor Integration**: Use as a preprocessor for `coding-policy-ai-auditor`
+
+---
+
+## Background
+
+This tool is a small utility born during the development of **IXV**, an AI assistant for Japanese development documents and specifications.
+
+IXV addresses challenges in understanding, structuring, and utilizing Japanese documents in software development. This repository provides a standalone component from that ecosystem.
 
 ---
 
 ## Features
 
 - Generate **1 prompt per rule** from an Excel policy where **1 row = 1 rule**
-- Automatically create rule detail sheets (for example, `PROMPT_XXXX`)
-- Automatically set **Excel-internal links (HYPERLINK)** from the index sheet’s link column (default: the rightmost header column)
-- Use templates for prompt generation and standardize the **JSON output shape** (OK / NG / reason)
-- Extend existing policy workbooks by **appending** auditing definitions without breaking the index sheet
-
----
-
-## Intended Use Cases
-
-- Feed coding policies into AI and run **automated review / automated auditing**
-- Manage rules as **data**, not just prose, and include AI execution definitions
-- Build a full pipeline: policy (Excel) → prompt (System) → audit result (JSON)
-- Use this as a preprocessor for `coding-policy-ai-auditor`
+- Automatically create **detail sheets** (e.g., `PROMPT_XXXX`) for each rule
+- Automatically set **Excel-internal links (HYPERLINK)** from the index sheet's link column
+- Standardize prompt generation with templates and **JSON output format** (OK/NG/reason)
+- Extend existing policy workbooks by **appending** without breaking the index sheet
+- Ensure **idempotency** - re-runs do not destroy existing data
 
 ---
 
 ## Documents
 
-- `CHANGELOG.md` - Version history
-- `CONTRIBUTING.md` - Contribution guide
-- `SECURITY.md` - Security policy
-- `CODE_OF_CONDUCT.md` - Code of conduct
-- `.github/` - Issue / Pull Request templates
+- [CHANGELOG.md](CHANGELOG.md) - Version history
+- [CONTRIBUTING.md](CONTRIBUTING.md) - Contribution guide
+- [SECURITY.md](SECURITY.md) - Security policy
+- [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) - Code of conduct
+- [spec.md](spec.md) - Technical specification
 
 ---
 
@@ -56,13 +54,13 @@ A CLI tool that reads an Excel-based coding policy (1 row = 1 rule), automatical
 
 ### Requirements
 
-- Python 3.9+
+- Python 3.9 or higher
 - `uv` package manager (recommended)
 
 ### Install Dependencies
 
 ```bash
-# Install uv (if needed)
+# Install uv (if not already installed)
 # See: https://docs.astral.sh/uv/getting-started/installation/
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
@@ -70,48 +68,44 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 uv sync --dev
 ```
 
-> Note: run `uv sync` from the directory that contains `pyproject.toml`.
+> Note: Run `uv sync` from the directory containing `pyproject.toml`.
 
 ---
 
-## Usage (CLI)
+## Usage
 
-Basic form:
+### Basic Usage
 
 ```bash
 uv run coding-policy-prompt-generator input.xlsx
 ```
 
-This reads `input.xlsx` and generates a prompt-expanded workbook in the same directory.
+This reads `input.xlsx` and generates a **prompt-expanded workbook** in the same directory.
 
 - Default output name: `<stem>_with_prompts.xlsx`
 - Example: `input.xlsx` → `input_with_prompts.xlsx`
 
-> You can change the output path via `-o/--output`.
+### Examples
 
----
-
-## Examples
-
-### 1) Generate prompts with the built-in template
+#### 1) Generate prompts with the built-in template
 
 ```bash
 uv run coding-policy-prompt-generator rules.xlsx
 ```
 
-### 2) Specify the output filename
+#### 2) Specify the output filename
 
 ```bash
 uv run coding-policy-prompt-generator rules.xlsx -o rules_prompts.xlsx
 ```
 
-### 3) Swap in a prompt template (Jinja2)
+#### 3) Use a custom prompt template (Jinja2)
 
 ```bash
 uv run coding-policy-prompt-generator rules.xlsx --template ./templates/system_prompt.j2
 ```
 
-### 4) Specify the index sheet name / link column name
+#### 4) Specify the index sheet name / link column name
 
 ```bash
 uv run coding-policy-prompt-generator rules.xlsx \
@@ -119,56 +113,50 @@ uv run coding-policy-prompt-generator rules.xlsx \
   --link-column "Detail Link"
 ```
 
----
+#### 5) Preview changes (dry-run)
 
-## Input Excel Assumptions (Recommended Format)
-
-- **First sheet**: rule index (1 row = 1 rule)
-- Link column: the column used for detail links (default: the rightmost header column, for example `Detail Link`)
-- It is recommended that the rule index contains at least the following columns:
-
-| Column name (example) | Purpose |
-|---|---|
-| Item / RuleID | Rule ID (used in prompt sheet names and JSON output) |
-| Classification | High-level grouping (optional) |
-| Category | Target scope (for example: general / class / method) |
-| Summary | The rule statement (core input for prompt generation) |
-| Description | Background, exceptions, examples (optional) |
-| Detail Link | The link column overwritten by the tool (required; writes into an existing column) |
-
-> The tool is designed to allow column-name mapping via CLI options so it can fit existing workbooks.
-> Header comparisons use NFC normalization, and the implementation tolerates some whitespace / separator variation.
-> If required column resolution becomes ambiguous, the tool fails fast for safety.
-
-### Sample Excel (in this repository)
-
-We use the following sample workbook as the baseline for implementation and verification:
-
-- `docs/ai-auditor-format/20260121AIオーディター形式サンプルコーディング規約.xlsx`
-
-Key characteristics of the sample (implementation notes):
-
-- Index sheet name: `コーディング規約一覧`
-- Header row: row 3 (rows 1–2 are explanatory text)
-- Headers are roughly: `項番 / 分類 / カテゴリ / 概要 / 説明`
-- The first data cell in the `説明` column contains `リンク`, effectively making it the link column
-- In that case, the `説明` column is treated as the link column and description text is not used
-
-For safety, the implementation should support at least one of the following:
-
-- Specify the header row number
-- Explicitly specify the link column name (for example, treat `説明` as the link column)
-- Skip pre-header explanatory rows
+```bash
+uv run coding-policy-prompt-generator rules.xlsx --dry-run
+```
 
 ---
 
-## Generated Detail Sheets (Example)
+## Main Options
+
+### I/O
+
+| Option | Default | Description |
+|---|---|---|
+| `-o`, `--output` | Same directory as input | Output Excel path |
+| `--dry-run` | false | Show change summary only; do not write the file |
+
+### Sheet / Column Mapping
+
+| Option | Default | Description |
+|---|---|---|
+| `--index-sheet` | First sheet | Index sheet name |
+| `--header-row` | `1` | Header row number (sample uses `3`) |
+| `--id-column` | `項番` | Rule ID column |
+| `--summary-column` | `概要` | Rule summary column |
+| `--description-column` | `説明` | Description / notes column |
+| `--link-column` | Rightmost header column | Detail link column |
+
+### Generation
+
+| Option | Default | Description |
+|---|---|---|
+| `--sheet-prefix` | `PROMPT_` | Prefix for detail sheet names |
+| `--template` | Built-in | Prompt template file (Jinja2) |
+
+---
+
+## Output Example
+
+### Generated Detail Sheets
 
 The tool creates one sheet per rule and writes the prompt body starting at cell A1.
 
-- Example sheet names: `PROMPT_N-001`, `PROMPT_001` (derived from rule ID and naming rules)
-
-Generation image:
+- Example sheet names: `PROMPT_N-001` / `PROMPT_001`
 
 ```text
 [SYSTEM PROMPT]
@@ -179,89 +167,72 @@ Evaluate the code using only the following rule.
 [Rule ID]
 N-001
 
-[Classification]
-(from the Excel “Classification” column, if present)
-
-[Category]
-(from the Excel “Category” column, if present)
-
 [Rule Summary]
-(from the Excel “Summary” column)
+(Content from the "Summary" column in Excel)
 
 [Notes]
-(from the Excel “Description” column, etc.)
+(Content from the "Description" column in Excel)
 
 [Output Format]
 {
   "rule_id": "N-001",
   "result": "OK | NG",
-  "reason": "Brief, clear Japanese explanation"
+  "reason": "Brief explanation"
 }
 ```
 
 ---
 
-## Main Options (Design + Current Behavior)
+## Input Excel Assumptions
 
-> Keep this section aligned with the implementation. It reflects both the current behavior and the intended CLI shape.
+### Recommended Format
 
-### I/O
+- **First sheet**: Rule index (1 row = 1 rule)
+- Link column: Column for detail links (default: rightmost header column)
 
-| Option | Default | Description |
-|---|---:|---|
-| `-o`, `--output` | Same directory as input | Output Excel path |
-| `--dry-run` | false | Show the change plan only; do not write the file |
+| Column name (example) | Purpose |
+|---|---|
+| Item / RuleID | Rule ID (used in prompt sheet names and JSON output) |
+| Classification | High-level grouping (optional) |
+| Category | Target scope (e.g., general / class / method) |
+| Summary | The rule statement (core input for prompt generation) |
+| Description | Background, exceptions, examples (optional) |
+| Detail Link | Link column overwritten by the tool (required) |
 
-### Sheet / Column Mapping
+### Sample Excel
 
-| Option | Default | Description |
-|---|---:|---|
-| `--index-sheet` | First sheet | Index sheet name |
-| `--header-row` | `1` | Header row number (the sample uses `3`) |
-| `--id-column` | `項番` | Rule ID column |
-| `--summary-column` | `概要` | Rule summary column |
-| `--description-column` | `説明` | Description / notes column |
-| `--link-column` | Rightmost header column | Detail link column (if omitted, the rightmost header column is used) |
+The following sample workbook is used for implementation and verification:
 
-> The link column is always an existing column. If the specified column (or the rightmost header column) cannot be resolved, the tool fails with an error (per `Spec.md`).
-> Existing detail sheets are only updated when A1 contains the rule ID marker. If it does not match, the tool creates a new sheet.
-> Marker format: `【ルールID】\n<rule_id>` (example: `【ルールID】\nN-001`)
-
-### Generation
-
-| Option | Default | Description |
-|---|---:|---|
-| `--sheet-prefix` | `PROMPT_` | Prefix for detail sheet names |
-| `--template` | Built-in | Prompt template file (Jinja2) |
-| `--output-format` | `json` | Audit output format hint (planned; MVP-external) |
-
-> Note: `--output-format` is outside the current MVP scope. `--template` is implemented (requires Jinja2).
+- `docs/ai-auditor-format/20260121AIオーディター形式サンプルコーディング規約.xlsx`
 
 ---
 
-## Repository Structure (Current)
+## Directory Structure
 
 ```text
 coding-policy-prompt-generator/
-├── .github/
-├── docs/
-├── src/
-├── tests/
-├── CHANGELOG.md
-├── CODE_OF_CONDUCT.md
-├── CONTRIBUTING.md
-├── LICENSE
-├── README.md
-├── README_ja.md
-├── SECURITY.md
-└── pyproject.toml
+├── .github/                # Issue / PR templates
+├── docs/                   # Documentation and samples
+├── src/                    # Source code
+├── tests/                  # Test code
+├── CHANGELOG.md            # Version history
+├── CODE_OF_CONDUCT.md      # Code of conduct
+├── CONTRIBUTING.md         # Contribution guide
+├── LICENSE                 # License
+├── README.md               # README (English)
+├── README_ja.md            # README (Japanese)
+├── SECURITY.md             # Security policy
+├── pyproject.toml          # Project configuration
+└── spec.md                 # Technical specification
 ```
 
 ---
 
 ## Security
 
-- Only process Excel files you trust
+For details, see [SECURITY.md](SECURITY.md).
+
+- Only process Excel files from trusted sources
 - Macros (VBA) are not executed
 - Generated prompts and links are stored as plain text in the workbook (be careful with sensitive data)
 
@@ -269,27 +240,27 @@ coding-policy-prompt-generator/
 
 ## Contributing
 
-Issues and Pull Requests are welcome.
+Issues and Pull Requests are welcome. For details, see [CONTRIBUTING.md](CONTRIBUTING.md).
 
-- Bug reports: GitHub Issues
-- Improvement proposals: Issues or Discussions
-- PRs: small, focused changes are preferred (tests are strongly recommended)
+- **Bug reports**: GitHub Issues
+- **Improvement proposals**: Issues or Discussions
+- **PRs**: Small, focused changes preferred (tests recommended)
 
 ---
 
-## Background
+## Changelog
 
-This tool originated as one of a set of verification utilities created during the development of the IXV AI assistant. Its role is the pre-processing step of turning **Excel-based coding policies into AI-executable definitions**.
+For details, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
 ## License
 
-MIT License. See `LICENSE` for details.
+MIT License - See [LICENSE](LICENSE) for details.
 
 ---
 
 ## Contact
 
-- Email: info@elvez.co.jp
-- Company: Elvez, Inc.
+- **Email**: info@elvez.co.jp
+- **Company**: Elvez, Inc.

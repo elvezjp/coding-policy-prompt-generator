@@ -2,53 +2,51 @@
 
 [English](./README.md) | [日本語](./README_ja.md)
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
-[![Python](https://img.shields.io/badge/Python-3.9%2B-3776AB.svg?logo=python&logoColor=white)](https://www.python.org/)
-[![uv](https://img.shields.io/badge/uv-recommended-5C2D91.svg)](https://docs.astral.sh/uv/)
+[![Elvez](https://img.shields.io/badge/Elvez-Product-3F61A7?style=flat-square)](https://elvez.co.jp/)
+[![IXV Ecosystem](https://img.shields.io/badge/IXV-Ecosystem-3F61A7?style=flat-square)](https://elvez.co.jp/ixv/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)](./LICENSE)
+[![Python](https://img.shields.io/badge/Python-3.9+-blue?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
+[![uv](https://img.shields.io/badge/uv-recommended-5C2D91?style=flat-square)](https://docs.astral.sh/uv/)
 
-Excel形式の「コーディング規約（1行＝1ルール）」から、**AIオーディター向けのプロンプト（System Prompt）**をルール単位で自動生成し、Excel内の「詳細シート」に展開するCLIツールです（これから実装していく段階の設計ドキュメントも兼ねています）。
-
-- 入力：コーディング規約Excel（例：1シート目にルール一覧、右端列に「詳細リンク」列）
-- 出力：各ルールの詳細シート（プロンプト本文）＋ ルール一覧から詳細シートへのハイパーリンク
-
-> 目的：**Excel文化を維持したまま、AI監査（AI Auditor）に渡せる“実行定義”へ変換する**こと。
+Excel形式の「コーディング規約（1行＝1ルール）」から、**AIオーディター向けのプロンプト（System Prompt）** をルール単位で自動生成し、Excel内の「詳細シート」に展開するCLIツールです。
 
 ---
 
-## 現在のステータス
+## ユースケース
 
-- このリポジトリは **M4（template/dry-run）まで実装済み**です
-- 2026-01-27 時点で `src/` と `pyproject.toml` は配置済みです
-- CLIオプションには将来仕様（MVP外）も一部含まれます（例: `--output-format`）
+- **自動コードレビュー**: コーディング規約をAIに読み込ませて、自動レビュー/自動監査を実施
+- **規約のデータ化**: ルールを「文章」ではなく「データ」として管理し、AI実行定義まで含める
+- **一気通貫パイプライン**: 規約（Excel）→ プロンプト（System）→ 監査結果（JSON）の変換を自動化
+- **AI監査ツール連携**: `coding-policy-ai-auditor` の前処理（プロンプト生成）として使用
+
+---
+
+## 開発の背景
+
+本ツールは、日本語の開発文書・仕様書を対象とした開発支援AI **IXV（イクシブ）** の開発過程で生まれた小さな実用品です。
+
+IXVでは、システム開発における日本語の文書について、理解・構造化・活用という課題に取り組んでおり、本リポジトリでは、その一部を切り出して公開しています。
 
 ---
 
 ## 特徴
 
-- **1行＝1ルール**の規約Excelから、**1ルール＝1プロンプト**を生成
-- ルールごとに **詳細シート**（PROMPT_XXXX など）を自動作成
-- ルール一覧のリンク列に、詳細シートへの **Excel内リンク（HYPERLINK）**を自動設定（既定はヘッダ最右端列）
+- **1行＝1ルール** の規約Excelから、**1ルール＝1プロンプト** を生成
+- ルールごとに **詳細シート**（`PROMPT_XXXX` など）を自動作成
+- ルール一覧のリンク列に、詳細シートへの **Excel内リンク（HYPERLINK）** を自動設定
 - 生成プロンプトはテンプレート化でき、**出力JSON形式**（OK/NG/理由）も統一
-- 既存の規約Excelを壊さず、**“追記”で拡張**（監査定義の同梱）
-
----
-
-## 想定ユースケース
-
-- コーディング規約をAIに読み込ませて、**自動レビュー/自動監査**をしたい
-- ルールを「文章」ではなく「データ」として管理し、AI実行定義まで含めたい
-- 規約（Excel）→ プロンプト（System）→ 監査結果（JSON）を一気通貫にしたい
-- `coding-policy-ai-auditor` の前処理（プロンプト生成）として使いたい
+- 既存の規約Excelを壊さず、**"追記"で拡張**（監査定義の同梱）
+- 再実行しても既存データを破壊しない **冪等性** を確保
 
 ---
 
 ## ドキュメント
 
-- `CHANGELOG.md` - バージョン履歴
-- `CONTRIBUTING.md` - コントリビューションガイド
-- `SECURITY.md` - セキュリティポリシー
-- `CODE_OF_CONDUCT.md` - 行動規範
-- `.github/` - Issue / Pull Request テンプレート
+- [CHANGELOG.md](CHANGELOG.md) - バージョン履歴
+- [CONTRIBUTING.md](CONTRIBUTING.md) - コントリビューション方法
+- [SECURITY.md](SECURITY.md) - セキュリティポリシー
+- [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) - 行動規範
+- [spec.md](spec.md) - 技術仕様書
 
 ---
 
@@ -67,51 +65,47 @@ Excel形式の「コーディング規約（1行＝1ルール）」から、**AI
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
 # 依存関係の同期
-uv sync
+uv sync --dev
 ```
 
-> 注意：`uv sync` を成功させるには、`pyproject.toml` があるディレクトリで実行してください。
+> 注意：`uv sync` は `pyproject.toml` があるディレクトリで実行してください。
 
 ---
 
-## 使い方（CLI）
+## 使い方
 
-基本形：
+### 基本的な使い方
 
 ```bash
 uv run coding-policy-prompt-generator input.xlsx
 ```
 
-これにより、`input.xlsx` を読み取り、同じディレクトリに **プロンプト展開済みのExcel**を生成する想定です。
+`input.xlsx` を読み取り、同じディレクトリに **プロンプト展開済みのExcel** を生成します。
 
 - 既定の出力名：`<stem>_with_prompts.xlsx`
 - 例：`input.xlsx` → `input_with_prompts.xlsx`
 
-> 出力先は `-o/--output` で変更できます。
+### 使用例
 
----
-
-## 例
-
-### 1) 既定テンプレートでプロンプトを生成
+#### 1) 既定テンプレートでプロンプトを生成
 
 ```bash
 uv run coding-policy-prompt-generator rules.xlsx
 ```
 
-### 2) 出力ファイル名を指定
+#### 2) 出力ファイル名を指定
 
 ```bash
 uv run coding-policy-prompt-generator rules.xlsx -o rules_prompts.xlsx
 ```
 
-### 3) プロンプトテンプレートを差し替え（Jinja2想定）
+#### 3) プロンプトテンプレートを差し替え（Jinja2）
 
 ```bash
 uv run coding-policy-prompt-generator rules.xlsx --template ./templates/system_prompt.j2
 ```
 
-### 4) ルール一覧シート名／リンク列名を指定
+#### 4) ルール一覧シート名／リンク列名を指定
 
 ```bash
 uv run coding-policy-prompt-generator rules.xlsx \
@@ -119,56 +113,50 @@ uv run coding-policy-prompt-generator rules.xlsx \
   --link-column "詳細リンク"
 ```
 
----
+#### 5) 変更内容をプレビュー（dry-run）
 
-## 入力Excelの前提（推奨フォーマット）
-
-- **1シート目**：ルール一覧（1行＝1ルール）
-- リンク列：詳細へのリンク列（既定はヘッダ最右端列、例：`詳細リンク`）
-- ルール一覧には、最低限以下の列があることを推奨します：
-
-| 列名（例） | 用途 |
-|---|---|
-| 項番 / RuleID | ルールID（PROMPTシート名や出力JSONに利用） |
-| 分類 | ルールの大分類（任意） |
-| カテゴリ | 対象（例：全般／クラス／メソッド など） |
-| 概要 | ルール主文（生成プロンプトの核） |
-| 説明 | 補足・背景・例外条件など（任意） |
-| 詳細リンク | ツールが上書きするリンク列（必須。既存列に書き込み） |
-
-> 既存の列名に合わせられるよう、CLIオプションで列名のマッピングを指定できる設計を想定しています。
-> 列名の比較はNFC正規化のうえで、空白や区切りの揺れをある程度吸収する実装です。
-> 必須列の解決で曖昧一致が発生した場合は、安全のためエラー終了します。
-
-### サンプルExcel（リポジトリ内）
-
-以下のサンプルをベースに実装・検証を進める想定です。
-
-- `docs/ai-auditor-format/20260121AIオーディター形式サンプルコーディング規約.xlsx`
-
-このサンプルの特徴（実装時の注意点）：
-
-- 一覧シート名は `コーディング規約一覧`
-- ヘッダ行は 3 行目（1-2 行目は説明文）
-- ヘッダは概ね `項番 / 分類 / カテゴリ / 概要 / 説明`
-- `説明` 列の先頭データに `リンク` と入っており、実質的にリンク列として使われています
-- この場合、`説明` 列の補足は扱わず、リンク列として上書きされる想定です
-
-そのため実装では、次のいずれかに対応できると安全です。
-
-- ヘッダ行番号を指定できる
-- リンク列名を明示指定できる（例：`説明` をリンク列として扱う）
-- 冒頭の説明行をスキップする
+```bash
+uv run coding-policy-prompt-generator rules.xlsx --dry-run
+```
 
 ---
 
-## 生成される詳細シート（例）
+## 主要オプション
 
-各ルールにつき 1シートを作成し、A1 からプロンプト本文を出力します。
+### 入出力
 
-- シート名例：`PROMPT_N-001` / `PROMPT_001` など（IDと命名規則で決定）
+| オプション | 既定値 | 説明 |
+|---|---|---|
+| `-o`, `--output` | 入力と同じ場所 | 出力Excelパス |
+| `--dry-run` | false | 変更内容の概要だけ表示し、ファイルは出力しない |
 
-生成イメージ：
+### シート・列マッピング
+
+| オプション | 既定値 | 説明 |
+|---|---|---|
+| `--index-sheet` | 先頭シート | ルール一覧シート名 |
+| `--header-row` | `1` | ヘッダ行番号（サンプルは `3`） |
+| `--id-column` | `項番` | ルールID列 |
+| `--summary-column` | `概要` | ルール主文列 |
+| `--description-column` | `説明` | 補足列 |
+| `--link-column` | ヘッダ最右端列 | 詳細リンク列 |
+
+### 生成仕様
+
+| オプション | 既定値 | 説明 |
+|---|---|---|
+| `--sheet-prefix` | `PROMPT_` | 詳細シート名の接頭辞 |
+| `--template` | 内蔵 | プロンプトテンプレートファイル（Jinja2） |
+
+---
+
+## 出力例
+
+### 生成される詳細シート
+
+各ルールにつき1シートを作成し、A1からプロンプト本文を出力します。
+
+- シート名例：`PROMPT_N-001` / `PROMPT_001`
 
 ```text
 【SYSTEM PROMPT】
@@ -180,10 +168,10 @@ uv run coding-policy-prompt-generator rules.xlsx \
 N-001
 
 【ルール概要】
-（Excelの「概要」）
+（Excelの「概要」列の内容）
 
 【補足】
-（Excelの「説明」など）
+（Excelの「説明」列の内容）
 
 【出力形式】
 {
@@ -195,59 +183,54 @@ N-001
 
 ---
 
-## 主なオプション（案）
+## 入力Excelの前提
 
-> 実装に合わせて更新してください。CLI設計の“完成形イメージ”として記載しています。
+### 推奨フォーマット
 
-### 入出力
+- **1シート目**：ルール一覧（1行＝1ルール）
+- リンク列：詳細へのリンク列（既定はヘッダ最右端列）
 
-| オプション | 既定 | 説明 |
-|---|---:|---|
-| `-o`, `--output` | 入力と同じ場所 | 出力Excelパス |
-| `--dry-run` | false | 変更内容の概要だけ表示し、ファイルは出力しない |
+| 列名（例） | 用途 |
+|---|---|
+| 項番 / RuleID | ルールID（PROMPTシート名や出力JSONに利用） |
+| 分類 | ルールの大分類（任意） |
+| カテゴリ | 対象（例：全般／クラス／メソッド など） |
+| 概要 | ルール主文（生成プロンプトの核） |
+| 説明 | 補足・背景・例外条件など（任意） |
+| 詳細リンク | ツールが上書きするリンク列（必須） |
 
-### シート・列マッピング
+### サンプルExcel
 
-| オプション | 既定 | 説明 |
-|---|---:|---|
-| `--index-sheet` | 先頭シート | ルール一覧シート名 |
-| `--header-row` | `1` | ヘッダ行番号（サンプルは `3`） |
-| `--id-column` | `項番` | ルールID列 |
-| `--summary-column` | `概要` | ルール主文列 |
-| `--description-column` | `説明` | 補足列 |
-| `--link-column` | ヘッダ最右端列 | 詳細リンク列（未指定時はヘッダ行の最右端の列を使用） |
+以下のサンプルをベースに実装・検証を進めています。
 
-> リンク列は既存列に書き込みます。指定列／最右端列が解決できない場合はエラー終了の想定です（Spec準拠）。
-> 既存の詳細シートは、A1にルールIDのマーカーが含まれる場合のみ更新対象です（一致しない場合は新規作成）。
-> マーカーの形式：`【ルールID】\n<rule_id>`（例：`【ルールID】\nN-001`）
-
-### 生成仕様
-
-| オプション | 既定 | 説明 |
-|---|---:|---|
-| `--sheet-prefix` | `PROMPT_` | 詳細シート名の接頭辞 |
-| `--template` | 内蔵 | プロンプトテンプレートファイル（Jinja2） |
-| `--output-format` | `json` | 監査結果の出力形式（json等）※MVP後に実装予定 |
-
-> 注: `--output-format` はMVPスコープ外（将来仕様）です。`--template` は実装済みです（Jinja2依存）。
+- `docs/ai-auditor-format/20260121AIオーディター形式サンプルコーディング規約.xlsx`
 
 ---
 
-## リポジトリ構成（例）
+## ディレクトリ構成
 
-```
+```text
 coding-policy-prompt-generator/
-├── docs/
-│   └── ai-auditor-format/
-│       └── 20260121AIオーディター形式サンプルコーディング規約.xlsx
-└── README_ja.md
+├── .github/                # Issue / PR テンプレート
+├── docs/                   # ドキュメント・サンプル
+├── src/                    # ソースコード
+├── tests/                  # テストコード
+├── CHANGELOG.md            # バージョン履歴
+├── CODE_OF_CONDUCT.md      # 行動規範
+├── CONTRIBUTING.md         # コントリビューションガイド
+├── LICENSE                 # ライセンス
+├── README.md               # README（英語）
+├── README_ja.md            # README（日本語）
+├── SECURITY.md             # セキュリティポリシー
+├── pyproject.toml          # プロジェクト設定
+└── spec.md                 # 技術仕様書
 ```
-
-> 上記は「現時点の実ファイル構成」です。`src/` や `pyproject.toml` などはこれから追加していきます。
 
 ---
 
 ## セキュリティ
+
+セキュリティに関する詳細は [SECURITY.md](SECURITY.md) を参照してください。
 
 - 信頼できるExcelファイルのみを処理してください
 - マクロ（VBA）は実行しません
@@ -257,28 +240,27 @@ coding-policy-prompt-generator/
 
 ## コントリビューション
 
-Issue / Pull Request 歓迎です。
+Issue / Pull Request を歓迎します。詳細は [CONTRIBUTING.md](CONTRIBUTING.md) を参照してください。
 
-- 不具合報告：GitHub Issues
-- 改善提案：Issue または Discussion（運用する場合）
-- PR：小さめの単位で歓迎（テスト追加推奨）
+- **不具合報告**: GitHub Issues
+- **改善提案**: Issues または Discussions
+- **PR**: 小さめの単位で歓迎（テスト追加推奨）
 
 ---
 
-## 背景
+## 変更履歴
 
-本ツールは、開発支援AI「IXV（イクシブ）」の開発過程で生まれた検証ツール群の一つとして、**「Excelの規約をAIが実行できる形へ」**という前処理を担う目的で作られました。
+詳細は [CHANGELOG.md](CHANGELOG.md) を参照してください。
 
 ---
 
 ## ライセンス
 
-MIT License（予定）  
-詳細は `LICENSE` を参照してください。
+MIT License - 詳細は [LICENSE](LICENSE) を参照してください。
 
 ---
 
-## 連絡先
+## 問い合わせ先
 
-- Email: info@elvez.co.jp
-- Company: Elvez, Inc.
+- **Email**: info@elvez.co.jp
+- **宛先**: 株式会社エルブズ
