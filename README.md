@@ -45,7 +45,6 @@ IXV addresses challenges in understanding, structuring, and utilizing Japanese d
 - [CHANGELOG.md](CHANGELOG.md) - Version history
 - [CONTRIBUTING.md](CONTRIBUTING.md) - Contribution guide
 - [SECURITY.md](SECURITY.md) - Security policy
-- [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) - Code of conduct
 - [spec.md](spec.md) - Technical specification
 
 ---
@@ -211,12 +210,10 @@ The following sample workbook is used for implementation and verification:
 
 ```text
 coding-policy-prompt-generator/
-├── .github/                # Issue / PR templates
 ├── docs/                   # Documentation and samples
 ├── src/                    # Source code
 ├── tests/                  # Test code
 ├── CHANGELOG.md            # Version history
-├── CODE_OF_CONDUCT.md      # Code of conduct
 ├── CONTRIBUTING.md         # Contribution guide
 ├── LICENSE                 # License
 ├── README.md               # README (English)
