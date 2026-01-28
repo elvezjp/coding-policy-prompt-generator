@@ -84,6 +84,16 @@ uv run coding-policy-prompt-generator input.xlsx
 - 既定の出力名：`<stem>_with_prompts.xlsx`
 - 例：`input.xlsx` → `input_with_prompts.xlsx`
 
+### 入力Excelの例
+
+| 項番 | 分類 | カテゴリ | 概要 | 説明 |
+|------|------|----------|------|------|
+| N-001 | 命名規則 | クラス | クラス名はPascalCaseとする | 例: UserAccount, OrderService |
+| N-002 | 命名規則 | メソッド | メソッド名はcamelCaseとする | 例: getUserName, calculateTotal |
+| N-003 | コメント | 全般 | publicメソッドにはJavadocを記述する | @param, @return, @throwsを含める |
+
+> または、`docs/ai-auditor-format/` にあるサンプルExcelを編集して使用することもできます。
+
 ### 使用例
 
 #### 1) 既定テンプレートでプロンプトを生成

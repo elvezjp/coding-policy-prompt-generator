@@ -84,6 +84,16 @@ This reads `input.xlsx` and generates a **prompt-expanded workbook** in the same
 - Default output name: `<stem>_with_prompts.xlsx`
 - Example: `input.xlsx` → `input_with_prompts.xlsx`
 
+### Input Excel Example
+
+| Item No. | Classification | Category | Summary | Description |
+|----------|----------------|----------|---------|-------------|
+| N-001 | Naming | Class | Class names should use PascalCase | e.g., UserAccount, OrderService |
+| N-002 | Naming | Method | Method names should use camelCase | e.g., getUserName, calculateTotal |
+| N-003 | Comments | General | Public methods must have Javadoc | Include @param, @return, @throws |
+
+> Alternatively, you can edit and use the sample Excel file in `docs/ai-auditor-format/`.
+
 ### Examples
 
 #### 1) Generate prompts with the built-in template
