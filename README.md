@@ -11,7 +11,7 @@
 
 A CLI tool that reads an Excel-based coding policy (1 row = 1 rule), automatically generates **rule-level prompts (System Prompts) for an AI auditor**, and expands them into "detail sheets" inside the same workbook.
 
-![Input/Output Example](docs/assets/20260128example.png)
+![Input/Output Example](docs/assets/example.png)
 
 ---
 

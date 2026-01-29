@@ -11,7 +11,7 @@
 
 Excel形式の「コーディング規約（1行＝1ルール）」から、**AIオーディター向けのプロンプト（System Prompt）** をルール単位で自動生成し、Excel内の「詳細シート」に展開するCLIツールです。
 
-![入出力例](docs/assets/20260128example.png)
+![入出力例](docs/assets/example.png)
 
 ---
 
