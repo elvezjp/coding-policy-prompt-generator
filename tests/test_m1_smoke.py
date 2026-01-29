@@ -54,6 +54,16 @@ def test_generate_prompts_minimal(tmp_path: Path) -> None:
     assert "PROMPT_N-001" in wb.sheetnames
 
     index_ws = wb["コーディング規約一覧"]
+
+    # AIオーディター形式の検証
+    # Row 1: 説明文
+    assert "AIオーディター" in index_ws.cell(row=1, column=1).value
+    # Row 2: クレジット
+    assert "coding-policy-prompt-generator" in index_ws.cell(row=2, column=1).value
+    # Row 3: ヘッダ行
+    assert index_ws.cell(row=3, column=1).value == "項番"
+    assert index_ws.cell(row=3, column=5).value == "説明"
+    # Row 4: データ行（説明列=column 5にハイパーリンク）
     link_value = index_ws.cell(row=4, column=5).value
     assert isinstance(link_value, str)
     assert "HYPERLINK" in link_value
@@ -93,6 +103,7 @@ def test_hyperlink_escapes_apostrophe_in_sheet_name(tmp_path: Path) -> None:
     )
 
     wb_out = load_workbook(output_path)
-    link_value = wb_out["一覧"].cell(row=2, column=3).value
+    # AIオーディター形式: データ行は4行目から、説明列（column 5）にハイパーリンク
+    link_value = wb_out["一覧"].cell(row=4, column=5).value
     assert isinstance(link_value, str)
     assert "O''Reilly-1" in link_value

@@ -50,15 +50,16 @@ def test_collision_suffix_is_stable_across_reruns(tmp_path: Path) -> None:
     assert len(plan1.created_sheets) == 2
 
     # Re-run using the generated workbook as the next input.
+    # Output uses AI auditor format with header at row 3.
     plan2 = generate_prompts(
         input_path=first_output,
         output_path=second_output,
         index_sheet="一覧",
-        header_row=1,
+        header_row=3,
         columns=ColumnConfig(
             id_column="項番",
             summary_column="概要",
-            description_column="説明",
+            description_column=None,
             link_column="説明",
         ),
         sheet_prefix="PROMPT_",
@@ -101,3 +102,9 @@ def test_sheet_name_strips_edge_apostrophes(tmp_path: Path) -> None:
     name = prompt_sheets[0]
     assert not name.startswith("'")
     assert not name.endswith("'")
+
+    # AIオーディター形式: データ行は4行目から、説明列（column 5）にハイパーリンク
+    index_ws = wb["一覧"]
+    link_value = index_ws.cell(row=4, column=5).value
+    assert isinstance(link_value, str)
+    assert "HYPERLINK" in link_value

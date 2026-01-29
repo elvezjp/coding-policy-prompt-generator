@@ -15,6 +15,14 @@ from openpyxl.worksheet.worksheet import Worksheet
 
 FORBIDDEN_SHEET_CHARS = set("[]:*?/\\")
 
+# AIオーディター形式の定数
+AI_AUDITOR_DESCRIPTION = "このコーディング規約ファイルは、AIオーディターで読み込むためのファイルです。"
+AI_AUDITOR_CREDIT = "このファイルはcoding-policy-prompt-generatorによって作成されました。"
+AI_AUDITOR_REPO_URL = "https://github.com/elvezjp/coding-policy-prompt-generator"
+AI_AUDITOR_HEADERS = ["項番", "分類", "カテゴリ", "概要", "説明"]
+AI_AUDITOR_HEADER_ROW = 3
+AI_AUDITOR_DATA_START_ROW = 4
+
 
 @dataclass
 class SkipRecord:
@@ -39,6 +47,16 @@ class GenerationPlan:
     skipped_rows: List[SkipRecord] = field(default_factory=list)
     warnings: List[str] = field(default_factory=list)
     actions: List[PlanAction] = field(default_factory=list)
+
+
+@dataclass
+class RuleData:
+    rule_id: str
+    summary: str
+    description: str
+    classification: str
+    category: str
+    sheet_name: str
 
 
 @dataclass
@@ -264,6 +282,38 @@ def _suggest_headers(headers: HeaderContext, name: str) -> List[str]:
     return [headers.relaxed_to_exacts[scored[0][1]][0]]
 
 
+def _rebuild_index_sheet(worksheet: Worksheet, rules: List[RuleData]) -> None:
+    """一覧シートをAIオーディター形式で再構築する。"""
+    # 既存データをクリア
+    for row in worksheet.iter_rows():
+        for cell in row:
+            cell.value = None
+            cell.hyperlink = None
+
+    # Row 1: 説明文
+    worksheet.cell(row=1, column=1, value=AI_AUDITOR_DESCRIPTION)
+
+    # Row 2: クレジット＋ハイパーリンク
+    credit_cell = worksheet.cell(row=2, column=1, value=AI_AUDITOR_CREDIT)
+    credit_cell.hyperlink = AI_AUDITOR_REPO_URL
+    credit_cell.font = Font(color="0000FF", underline="single")
+
+    # Row 3: ヘッダ行
+    for col, header in enumerate(AI_AUDITOR_HEADERS, start=1):
+        worksheet.cell(row=AI_AUDITOR_HEADER_ROW, column=col, value=header)
+
+    # Row 4+: データ行
+    for i, rule in enumerate(rules):
+        row_idx = AI_AUDITOR_DATA_START_ROW + i
+        worksheet.cell(row=row_idx, column=1, value=rule.rule_id)
+        worksheet.cell(row=row_idx, column=2, value=rule.classification)
+        worksheet.cell(row=row_idx, column=3, value=rule.category)
+        worksheet.cell(row=row_idx, column=4, value=rule.summary)
+        # 列5（説明）にハイパーリンクを設定（descriptionは詳細シートに記載されるため上書き）
+        link_cell = worksheet.cell(row=row_idx, column=5, value=_hyperlink_formula(rule.sheet_name))
+        link_cell.font = Font(color="0000FF", underline="single")
+
+
 def _process_rows(
     *,
     workbook: Workbook,
@@ -276,6 +326,8 @@ def _process_rows(
     project_context: Optional[str],
     plan: GenerationPlan,
 ) -> None:
+    rules: List[RuleData] = []
+
     for row_idx in range(header_row + 1, worksheet.max_row + 1):
         rule_id_raw = worksheet.cell(row=row_idx, column=resolved.id_col).value
         summary_raw = worksheet.cell(row=row_idx, column=resolved.summary_col).value
@@ -333,13 +385,20 @@ def _process_rows(
         detail_cell.alignment = Alignment(wrap_text=True, vertical="top")
         detail_ws.column_dimensions["A"].width = 80
 
-        link_cell = worksheet.cell(row=row_idx, column=resolved.link_col)
-        link_cell.hyperlink = None  # Clear existing hyperlink
-        link_cell.value = _hyperlink_formula(sheet_name)
-        link_cell.font = Font(color="0000FF", underline="single")  # Blue, underlined
+        rules.append(RuleData(
+            rule_id=rule_id,
+            summary=summary,
+            description=description,
+            classification=classification,
+            category=category,
+            sheet_name=sheet_name,
+        ))
 
         plan.processed_rules += 1
         plan.actions.append(PlanAction(kind=action_kind, row=row_idx, rule_id=rule_id, sheet_name=sheet_name))
+
+    # 一覧シートをAIオーディター形式で再構築
+    _rebuild_index_sheet(worksheet, rules)
 
 
 def _clean_cell(value: object) -> str:
