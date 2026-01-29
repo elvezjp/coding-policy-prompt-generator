@@ -68,9 +68,14 @@ def test_generate_prompts_minimal(tmp_path: Path) -> None:
     assert isinstance(link_value, str)
     assert "HYPERLINK" in link_value
 
-    prompt_value = wb["PROMPT_N-001"]["A1"].value
-    assert isinstance(prompt_value, str)
-    assert "N-001" in prompt_value
+    # A1: システムプロンプト
+    system_prompt = wb["PROMPT_N-001"]["A1"].value
+    assert isinstance(system_prompt, str)
+    assert "# SYSTEM PROMPT" in system_prompt
+    # A2: ユーザープロンプト（ルールIDを含む）
+    user_prompt = wb["PROMPT_N-001"]["A2"].value
+    assert isinstance(user_prompt, str)
+    assert "N-001" in user_prompt
 
 
 def test_hyperlink_escapes_apostrophe_in_sheet_name(tmp_path: Path) -> None:

@@ -194,20 +194,25 @@ def test_builtin_template_contains_new_sections(tmp_path: Path) -> None:
     )
 
     wb = load_workbook(output_path)
-    prompt = wb["PROMPT_R-1"]["A1"].value
-    assert isinstance(prompt, str)
+    # A1: システムプロンプト
+    system_prompt = wb["PROMPT_R-1"]["A1"].value
+    assert isinstance(system_prompt, str)
+    assert "# SYSTEM PROMPT" in system_prompt
+    # A2: ユーザープロンプト（新セクションを含む）
+    user_prompt = wb["PROMPT_R-1"]["A2"].value
+    assert isinstance(user_prompt, str)
     # 新セクションの存在確認（マークダウン形式）
-    assert "| 重大度 | （未指定） |" in prompt  # 規約概要テーブル内
-    assert "## 適用範囲・例外" in prompt
-    assert "## グレーゾーンの具体例" in prompt
+    assert "| 重大度 | （未指定） |" in user_prompt  # 規約概要テーブル内
+    assert "## 適用範囲・例外" in user_prompt
+    assert "## グレーゾーンの具体例" in user_prompt
     # プレースホルダとして「未記載」が含まれる
-    assert "（未記載）" in prompt
+    assert "（未記載）" in user_prompt
     # 記入ガイドの一部が含まれる
-    assert "必須（ビルドエラー）" in prompt  # 重大度のガイド
-    assert "- **対象**: クラス名、インターフェース名" in prompt
-    assert "// OK: PascalCase" in prompt
-    assert "// NG: 先頭小文字" in prompt
-    assert "`HTTPClient`" in prompt
+    assert "必須（ビルドエラー）" in user_prompt  # 重大度のガイド
+    assert "- **対象**: クラス名、インターフェース名" in user_prompt
+    assert "// OK: PascalCase" in user_prompt
+    assert "// NG: 先頭小文字" in user_prompt
+    assert "`HTTPClient`" in user_prompt
 
 
 def test_invalid_strictness_raises_error(tmp_path: Path) -> None:

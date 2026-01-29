@@ -361,7 +361,7 @@ def _process_rows(
             category = _clean_cell(worksheet.cell(row=row_idx, column=resolved.category_col).value)
 
         sheet_name, action_kind = _ensure_detail_sheet(workbook, sheet_prefix, rule_id, plan)
-        prompt = renderer.render(
+        system_prompt, user_prompt = renderer.render_separate(
             rule_id=rule_id,
             summary=summary,
             description=description,
@@ -370,8 +370,10 @@ def _process_rows(
             strictness=strictness,
             project_context=project_context,
         )
+        # マーカーチェック: システムプロンプトまたはユーザープロンプトに含まれるか確認
+        full_prompt = system_prompt + user_prompt
         markers = _rule_id_markers(rule_id)
-        if not any(marker in prompt for marker in markers):
+        if not any(marker in full_prompt for marker in markers):
             plan.warnings.append(
                 (
                     f"Row {row_idx} warning: prompt missing rule_id marker; "
@@ -380,9 +382,14 @@ def _process_rows(
             )
 
         detail_ws = workbook[sheet_name]
-        detail_cell = detail_ws["A1"]
-        detail_cell.value = prompt
-        detail_cell.alignment = Alignment(wrap_text=True, vertical="top")
+        # A1: システムプロンプト（カスタムテンプレートの場合は空）
+        cell_a1 = detail_ws["A1"]
+        cell_a1.value = system_prompt if system_prompt else user_prompt
+        cell_a1.alignment = Alignment(wrap_text=True, vertical="top")
+        # A2: ユーザープロンプト（カスタムテンプレートの場合はA1に全文出力されるため空）
+        cell_a2 = detail_ws["A2"]
+        cell_a2.value = user_prompt if system_prompt else ""
+        cell_a2.alignment = Alignment(wrap_text=True, vertical="top")
         detail_ws.column_dimensions["A"].width = 80
 
         rules.append(RuleData(
@@ -495,14 +502,17 @@ def _find_existing_detail_sheet_by_marker(workbook: Workbook, markers: List[str]
 
 
 def _sheet_matches_marker(workbook: Workbook, sheet_name: str, markers: List[str]) -> bool:
-    value = workbook[sheet_name]["A1"].value
-    if isinstance(value, str):
-        return any(marker in value for marker in markers)
+    """A1またはA2にマーカーが含まれるかを確認する。"""
+    ws = workbook[sheet_name]
+    for cell_addr in ["A1", "A2"]:
+        value = ws[cell_addr].value
+        if isinstance(value, str) and any(marker in value for marker in markers):
+            return True
     return False
 
 
 class PromptRenderer:
-    def render(
+    def render_separate(
         self,
         *,
         rule_id: str,
@@ -512,7 +522,8 @@ class PromptRenderer:
         category: str,
         strictness: str,
         project_context: Optional[str],
-    ) -> str:
+    ) -> Tuple[str, str]:
+        """Return (system_prompt, user_prompt) as separate strings."""
         raise NotImplementedError
 
 
@@ -527,7 +538,7 @@ class BuiltinPromptRenderer(PromptRenderer):
         self._system_template = env.from_string(system_text)
         self._user_template = env.from_string(user_text)
 
-    def render(
+    def render_separate(
         self,
         *,
         rule_id: str,
@@ -537,7 +548,7 @@ class BuiltinPromptRenderer(PromptRenderer):
         category: str,
         strictness: str,
         project_context: Optional[str],
-    ) -> str:
+    ) -> Tuple[str, str]:
         safe_project_context = project_context or ""
         context = {
             "rule_id": rule_id,
@@ -550,7 +561,7 @@ class BuiltinPromptRenderer(PromptRenderer):
         }
         system_prompt = self._system_template.render(**context)
         user_prompt = self._user_template.render(**context)
-        return system_prompt + user_prompt
+        return system_prompt, user_prompt
 
 
 class JinjaPromptRenderer(PromptRenderer):
@@ -563,7 +574,7 @@ class JinjaPromptRenderer(PromptRenderer):
         env = Environment(undefined=StrictUndefined, autoescape=False, trim_blocks=True, lstrip_blocks=True)
         self._template = env.from_string(template_text)
 
-    def render(
+    def render_separate(
         self,
         *,
         rule_id: str,
@@ -573,9 +584,10 @@ class JinjaPromptRenderer(PromptRenderer):
         category: str,
         strictness: str,
         project_context: Optional[str],
-    ) -> str:
+    ) -> Tuple[str, str]:
+        """カスタムテンプレートはシステム/ユーザー分離不可のため、全体をユーザープロンプトとして返す。"""
         safe_project_context = project_context or ""
-        return self._template.render(
+        full_prompt = self._template.render(
             rule_id=rule_id,
             summary=summary,
             description=description,
@@ -584,6 +596,7 @@ class JinjaPromptRenderer(PromptRenderer):
             strictness=strictness,
             project_context=safe_project_context,
         )
+        return "", full_prompt
 
 
 def _build_renderer(template_path: Optional[Path]) -> PromptRenderer:
