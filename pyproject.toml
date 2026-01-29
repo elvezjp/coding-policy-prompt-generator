@@ -16,6 +16,9 @@ coding-policy-prompt-generator = "coding_policy_prompt_generator.cli:main"
 requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
+[tool.setuptools.package-data]
+coding_policy_prompt_generator = ["templates/*.j2"]
+
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 testpaths = ["tests"]
