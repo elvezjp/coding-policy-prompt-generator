@@ -423,6 +423,7 @@ def _relaxed_key(text: str) -> str:
 def _rule_id_markers(rule_id: str) -> List[str]:
     return [
         f"規約ID: {rule_id}",
+        f"規約ID | `{rule_id}`",  # Markdown table format
         f"【ルールID】\n{rule_id}",
     ]
 
