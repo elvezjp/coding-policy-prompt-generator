@@ -182,9 +182,13 @@ uv run coding-policy-prompt-generator \
 
 ### Generated Detail Sheets
 
-The tool creates one sheet per rule and writes the prompt body starting at cell A1.
+The tool creates one sheet per rule and outputs the prompt body.
 
 - Example sheet names: `PROMPT_N-001` / `PROMPT_001`
+- Cell A1: Full system prompt text
+- Cell A2: Full user prompt text
+
+> **Note**: Due to Excel's cell height limitations, the full prompt text may not be displayed within the cell. The complete text is stored in the cell value. To view the full content, select the cell and check the formula bar, or copy the cells (A1:A2) to use the content.
 
 ```text
 【SYSTEM PROMPT】
