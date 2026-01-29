@@ -1,5 +1,7 @@
 # Plan: coding-policy-prompt-generator
 
+**PR #3 で対応完了**
+
 ## 1. 方針
 
 - まずサンプルExcelで確実に動くMVPを作る
