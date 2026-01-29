@@ -109,9 +109,10 @@ def test_builtin_template_strict_with_project_context(tmp_path: Path) -> None:
     wb = load_workbook(output_path)
     prompt = wb["PROMPT_R-1"]["A1"].value
     assert isinstance(prompt, str)
-    assert "【プロジェクト前提】" in prompt
+    assert "## プロジェクト前提" in prompt
     assert "Java 17, Spring Boot 3.x" in prompt
-    assert "【厳格度: strict】疑わしい場合は違反（NG）として判定" in prompt
+    assert "疑わしい場合は違反（NG）として判定" in prompt
+    assert "軽微な違反も見逃さない" in prompt
 
 
 def test_builtin_template_lenient_omits_project_context(tmp_path: Path) -> None:
@@ -138,8 +139,10 @@ def test_builtin_template_lenient_omits_project_context(tmp_path: Path) -> None:
     wb = load_workbook(output_path)
     prompt = wb["PROMPT_R-1"]["A1"].value
     assert isinstance(prompt, str)
-    assert "【プロジェクト前提】" not in prompt
-    assert "【厳格度: lenient】明らかな違反のみNG" in prompt
+    assert "## プロジェクト前提" not in prompt
+    assert "明らかな違反のみNGとする" in prompt
+    assert "疑わしい場合はOKとし、理由に懸念点を記載する" in prompt
+    assert "軽微な違反も見逃さない" not in prompt
 
 
 def test_project_context_empty_string_is_omitted(tmp_path: Path) -> None:
@@ -166,7 +169,7 @@ def test_project_context_empty_string_is_omitted(tmp_path: Path) -> None:
     wb = load_workbook(output_path)
     prompt = wb["PROMPT_R-1"]["A1"].value
     assert isinstance(prompt, str)
-    assert "【プロジェクト前提】" not in prompt
+    assert "## プロジェクト前提" not in prompt
 
 
 def test_builtin_template_contains_new_sections(tmp_path: Path) -> None:
@@ -193,18 +196,18 @@ def test_builtin_template_contains_new_sections(tmp_path: Path) -> None:
     wb = load_workbook(output_path)
     prompt = wb["PROMPT_R-1"]["A1"].value
     assert isinstance(prompt, str)
-    # 新セクションの存在確認
-    assert "【重大度】" in prompt
-    assert "【適用範囲・例外】" in prompt
-    assert "【グレーゾーンの具体例】" in prompt
+    # 新セクションの存在確認（マークダウン形式）
+    assert "| 重大度 | （未指定） |" in prompt  # 規約概要テーブル内
+    assert "## 適用範囲・例外" in prompt
+    assert "## グレーゾーンの具体例" in prompt
     # プレースホルダとして「未記載」が含まれる
-    assert "（未記載" in prompt
+    assert "（未記載）" in prompt
     # 記入ガイドの一部が含まれる
-    assert "記入例: 必須 - ビルドエラーの原因となる" in prompt
-    assert "記入例:\n- 対象: クラス名、インターフェース名" in prompt
-    assert "記入例:\n// OK: PascalCase" in prompt
-    assert "記入例:\n// NG: 先頭小文字" in prompt
-    assert "OKに見えるがNG: `HTTPClient`" in prompt
+    assert "必須（ビルドエラー）" in prompt  # 重大度のガイド
+    assert "- **対象**: クラス名、インターフェース名" in prompt
+    assert "// OK: PascalCase" in prompt
+    assert "// NG: 先頭小文字" in prompt
+    assert "`HTTPClient`" in prompt
 
 
 def test_invalid_strictness_raises_error(tmp_path: Path) -> None:

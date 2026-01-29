@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 import difflib
+import importlib.resources
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 from unicodedata import normalize as unicode_normalize
 
+from jinja2 import Environment
 from openpyxl import load_workbook
 from openpyxl.styles import Alignment, Font
 from openpyxl.workbook.workbook import Workbook
@@ -421,6 +423,7 @@ def _relaxed_key(text: str) -> str:
 def _rule_id_markers(rule_id: str) -> List[str]:
     return [
         f"規約ID: {rule_id}",
+        f"規約ID | `{rule_id}`",  # Markdown table format
         f"【ルールID】\n{rule_id}",
     ]
 
@@ -455,6 +458,16 @@ class PromptRenderer:
 
 
 class BuiltinPromptRenderer(PromptRenderer):
+    def __init__(self) -> None:
+        env = Environment(autoescape=False, trim_blocks=True, lstrip_blocks=True)
+        templates_package = "coding_policy_prompt_generator.templates"
+
+        system_text = importlib.resources.files(templates_package).joinpath("system_prompt.j2").read_text(encoding="utf-8")
+        user_text = importlib.resources.files(templates_package).joinpath("user_prompt.j2").read_text(encoding="utf-8")
+
+        self._system_template = env.from_string(system_text)
+        self._user_template = env.from_string(user_text)
+
     def render(
         self,
         *,
@@ -466,15 +479,19 @@ class BuiltinPromptRenderer(PromptRenderer):
         strictness: str,
         project_context: Optional[str],
     ) -> str:
-        return _render_prompt(
-            rule_id=rule_id,
-            summary=summary,
-            description=description,
-            classification=classification,
-            category=category,
-            strictness=strictness,
-            project_context=project_context,
-        )
+        safe_project_context = project_context or ""
+        context = {
+            "rule_id": rule_id,
+            "summary": summary,
+            "description": description,
+            "classification": classification,
+            "category": category,
+            "strictness": strictness,
+            "project_context": safe_project_context,
+        }
+        system_prompt = self._system_template.render(**context)
+        user_prompt = self._user_template.render(**context)
+        return system_prompt + user_prompt
 
 
 class JinjaPromptRenderer(PromptRenderer):
@@ -518,92 +535,6 @@ def _build_renderer(template_path: Optional[Path]) -> PromptRenderer:
         raise ValueError(f"Template file not found: {template_path}")
     template_text = template_path.read_text(encoding="utf-8")
     return JinjaPromptRenderer(template_text)
-
-
-def _render_prompt(
-    *,
-    rule_id: str,
-    summary: str,
-    description: str,
-    classification: str,
-    category: str,
-    strictness: str,
-    project_context: Optional[str],
-) -> str:
-    description_block = description if description else "（補足なし）"
-    classification_block = classification if classification else "（未指定）"
-    category_block = category if category else "（未指定）"
-    strictness_line = _strictness_line(strictness)
-    project_context_block = _project_context_block(project_context)
-    return (
-        "【SYSTEM PROMPT】\n\n"
-        "【役割】\n"
-        "あなたはソフトウェアコードを監査するAIオーディターです。\n\n"
-        "【目的】\n"
-        "ユーザープロンプトに与えられる規約に対して、提示されたコードが準拠しているかを判定します。\n"
-        "規約の内容以外の観点で評価や指摘を行ってはいけません。\n\n"
-        f"{project_context_block}"
-        "【出力形式】\n"
-        "{\n"
-        f"  \"rule_id\": \"{rule_id}\",\n"
-        "  \"result\": \"OK | NG\",\n"
-        "  \"reason\": \"日本語で簡潔に\"\n"
-        "}\n\n"
-        "【注意事項】\n"
-        "- 規約文から「対象」「判断基準」「許容/禁止」「例外」「混在時の扱い」を推論し、明示的に解釈して判定する。\n"
-        f"- {strictness_line}\n"
-        "- 不完全なコードや情報不足の場合は、不足点を理由に記載したうえで、可能な範囲で判定する。\n"
-        "- 判定不能な場合は result を \"NG\" とし、reason に判定不能の理由を記載する。\n"
-        "- 出力は上記JSON形式のみとし、余計な文章を付けない。\n\n"
-        "【USER PROMPT】\n\n"
-        "【規約概要】\n"
-        f"規約ID: {rule_id}\n"
-        f"概要: {summary}\n"
-        f"分類: {classification_block}\n"
-        f"カテゴリ: {category_block}\n\n"
-        "【重大度】\n"
-        "（未記載）\n"
-        "記入例: 必須 - ビルドエラーの原因となる / 推奨 - 可読性に影響 / 任意 - スタイル統一のため\n\n"
-        "【詳細ルール】\n"
-        f"{description_block}\n\n"
-        "【適用範囲・例外】\n"
-        "（未記載）\n"
-        "記入例:\n"
-        "- 対象: クラス名、インターフェース名\n"
-        "- 除外: テストコード、自動生成コード、外部ライブラリ由来の名前\n\n"
-        "【準拠の具体例】\n"
-        "（未記載）\n"
-        "記入例:\n"
-        "// OK: PascalCase\n"
-        "public class UserAccount { }\n"
-        "public class OrderService { }\n\n"
-        "【違反の具体例】\n"
-        "（未記載）\n"
-        "記入例:\n"
-        "// NG: 先頭小文字\n"
-        "public class userAccount { }\n"
-        "// NG: スネークケース\n"
-        "public class User_Account { }\n\n"
-        "【グレーゾーンの具体例】\n"
-        "（未記載）\n"
-        "記入例:\n"
-        "- OKに見えるがNG: `HTTPClient` → 正しくは `HttpClient`\n"
-        "- NGに見えるがOK: `XMLParser` → 略語の連続は許容される場合あり（プロジェクト方針による）\n\n"
-        "【チェック対象コード】\n"
-        "（ここに対象コードを貼り付け）\n"
-    )
-
-
-def _strictness_line(strictness: str) -> str:
-    if strictness == "lenient":
-        return "【厳格度: lenient】明らかな違反のみNG、疑わしい場合はOKとし、理由に懸念点を記載する。"
-    return "【厳格度: strict】疑わしい場合は違反（NG）として判定し、理由に曖昧さを記載する。"
-
-
-def _project_context_block(project_context: Optional[str]) -> str:
-    if not project_context:
-        return ""
-    return f"【プロジェクト前提】\n{project_context}\n\n"
 
 
 def _hyperlink_formula(sheet_name: str, label: str = "詳細") -> str:
