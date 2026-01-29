@@ -15,6 +15,14 @@ from openpyxl.worksheet.worksheet import Worksheet
 
 FORBIDDEN_SHEET_CHARS = set("[]:*?/\\")
 
+# AIオーディター形式の定数
+AI_AUDITOR_DESCRIPTION = "このコーディング規約ファイルは、AIオーディターで読み込むためのファイルです。"
+AI_AUDITOR_CREDIT = "このファイルはcoding-policy-prompt-generatorによって作成されました。"
+AI_AUDITOR_REPO_URL = "https://github.com/elvezjp/coding-policy-prompt-generator"
+AI_AUDITOR_HEADERS = ["項番", "分類", "カテゴリ", "概要", "説明"]
+AI_AUDITOR_HEADER_ROW = 3
+AI_AUDITOR_DATA_START_ROW = 4
+
 
 @dataclass
 class SkipRecord:
@@ -39,6 +47,16 @@ class GenerationPlan:
     skipped_rows: List[SkipRecord] = field(default_factory=list)
     warnings: List[str] = field(default_factory=list)
     actions: List[PlanAction] = field(default_factory=list)
+
+
+@dataclass
+class RuleData:
+    rule_id: str
+    summary: str
+    description: str
+    classification: str
+    category: str
+    sheet_name: str
 
 
 @dataclass
@@ -264,6 +282,38 @@ def _suggest_headers(headers: HeaderContext, name: str) -> List[str]:
     return [headers.relaxed_to_exacts[scored[0][1]][0]]
 
 
+def _rebuild_index_sheet(worksheet: Worksheet, rules: List[RuleData]) -> None:
+    """一覧シートをAIオーディター形式で再構築する。"""
+    # 既存データをクリア
+    for row in worksheet.iter_rows():
+        for cell in row:
+            cell.value = None
+            cell.hyperlink = None
+
+    # Row 1: 説明文
+    worksheet.cell(row=1, column=1, value=AI_AUDITOR_DESCRIPTION)
+
+    # Row 2: クレジット＋ハイパーリンク
+    credit_cell = worksheet.cell(row=2, column=1, value=AI_AUDITOR_CREDIT)
+    credit_cell.hyperlink = AI_AUDITOR_REPO_URL
+    credit_cell.font = Font(color="0000FF", underline="single")
+
+    # Row 3: ヘッダ行
+    for col, header in enumerate(AI_AUDITOR_HEADERS, start=1):
+        worksheet.cell(row=AI_AUDITOR_HEADER_ROW, column=col, value=header)
+
+    # Row 4+: データ行
+    for i, rule in enumerate(rules):
+        row_idx = AI_AUDITOR_DATA_START_ROW + i
+        worksheet.cell(row=row_idx, column=1, value=rule.rule_id)
+        worksheet.cell(row=row_idx, column=2, value=rule.classification)
+        worksheet.cell(row=row_idx, column=3, value=rule.category)
+        worksheet.cell(row=row_idx, column=4, value=rule.summary)
+        # 列5（説明）にハイパーリンクを設定（descriptionは詳細シートに記載されるため上書き）
+        link_cell = worksheet.cell(row=row_idx, column=5, value=_hyperlink_formula(rule.sheet_name))
+        link_cell.font = Font(color="0000FF", underline="single")
+
+
 def _process_rows(
     *,
     workbook: Workbook,
@@ -276,6 +326,8 @@ def _process_rows(
     project_context: Optional[str],
     plan: GenerationPlan,
 ) -> None:
+    rules: List[RuleData] = []
+
     for row_idx in range(header_row + 1, worksheet.max_row + 1):
         rule_id_raw = worksheet.cell(row=row_idx, column=resolved.id_col).value
         summary_raw = worksheet.cell(row=row_idx, column=resolved.summary_col).value
@@ -309,7 +361,7 @@ def _process_rows(
             category = _clean_cell(worksheet.cell(row=row_idx, column=resolved.category_col).value)
 
         sheet_name, action_kind = _ensure_detail_sheet(workbook, sheet_prefix, rule_id, plan)
-        prompt = renderer.render(
+        system_prompt, user_prompt = renderer.render_separate(
             rule_id=rule_id,
             summary=summary,
             description=description,
@@ -318,8 +370,10 @@ def _process_rows(
             strictness=strictness,
             project_context=project_context,
         )
+        # マーカーチェック: システムプロンプトまたはユーザープロンプトに含まれるか確認
+        full_prompt = system_prompt + user_prompt
         markers = _rule_id_markers(rule_id)
-        if not any(marker in prompt for marker in markers):
+        if not any(marker in full_prompt for marker in markers):
             plan.warnings.append(
                 (
                     f"Row {row_idx} warning: prompt missing rule_id marker; "
@@ -328,18 +382,30 @@ def _process_rows(
             )
 
         detail_ws = workbook[sheet_name]
-        detail_cell = detail_ws["A1"]
-        detail_cell.value = prompt
-        detail_cell.alignment = Alignment(wrap_text=True, vertical="top")
+        # A1: システムプロンプト（カスタムテンプレートの場合は空）
+        cell_a1 = detail_ws["A1"]
+        cell_a1.value = system_prompt if system_prompt else user_prompt
+        cell_a1.alignment = Alignment(wrap_text=True, vertical="top")
+        # A2: ユーザープロンプト（カスタムテンプレートの場合はA1に全文出力されるため空）
+        cell_a2 = detail_ws["A2"]
+        cell_a2.value = user_prompt if system_prompt else ""
+        cell_a2.alignment = Alignment(wrap_text=True, vertical="top")
         detail_ws.column_dimensions["A"].width = 80
 
-        link_cell = worksheet.cell(row=row_idx, column=resolved.link_col)
-        link_cell.hyperlink = None  # Clear existing hyperlink
-        link_cell.value = _hyperlink_formula(sheet_name)
-        link_cell.font = Font(color="0000FF", underline="single")  # Blue, underlined
+        rules.append(RuleData(
+            rule_id=rule_id,
+            summary=summary,
+            description=description,
+            classification=classification,
+            category=category,
+            sheet_name=sheet_name,
+        ))
 
         plan.processed_rules += 1
         plan.actions.append(PlanAction(kind=action_kind, row=row_idx, rule_id=rule_id, sheet_name=sheet_name))
+
+    # 一覧シートをAIオーディター形式で再構築
+    _rebuild_index_sheet(worksheet, rules)
 
 
 def _clean_cell(value: object) -> str:
@@ -436,14 +502,17 @@ def _find_existing_detail_sheet_by_marker(workbook: Workbook, markers: List[str]
 
 
 def _sheet_matches_marker(workbook: Workbook, sheet_name: str, markers: List[str]) -> bool:
-    value = workbook[sheet_name]["A1"].value
-    if isinstance(value, str):
-        return any(marker in value for marker in markers)
+    """A1またはA2にマーカーが含まれるかを確認する。"""
+    ws = workbook[sheet_name]
+    for cell_addr in ["A1", "A2"]:
+        value = ws[cell_addr].value
+        if isinstance(value, str) and any(marker in value for marker in markers):
+            return True
     return False
 
 
 class PromptRenderer:
-    def render(
+    def render_separate(
         self,
         *,
         rule_id: str,
@@ -453,7 +522,8 @@ class PromptRenderer:
         category: str,
         strictness: str,
         project_context: Optional[str],
-    ) -> str:
+    ) -> Tuple[str, str]:
+        """Return (system_prompt, user_prompt) as separate strings."""
         raise NotImplementedError
 
 
@@ -468,7 +538,7 @@ class BuiltinPromptRenderer(PromptRenderer):
         self._system_template = env.from_string(system_text)
         self._user_template = env.from_string(user_text)
 
-    def render(
+    def render_separate(
         self,
         *,
         rule_id: str,
@@ -478,7 +548,7 @@ class BuiltinPromptRenderer(PromptRenderer):
         category: str,
         strictness: str,
         project_context: Optional[str],
-    ) -> str:
+    ) -> Tuple[str, str]:
         safe_project_context = project_context or ""
         context = {
             "rule_id": rule_id,
@@ -491,7 +561,7 @@ class BuiltinPromptRenderer(PromptRenderer):
         }
         system_prompt = self._system_template.render(**context)
         user_prompt = self._user_template.render(**context)
-        return system_prompt + user_prompt
+        return system_prompt, user_prompt
 
 
 class JinjaPromptRenderer(PromptRenderer):
@@ -504,7 +574,7 @@ class JinjaPromptRenderer(PromptRenderer):
         env = Environment(undefined=StrictUndefined, autoescape=False, trim_blocks=True, lstrip_blocks=True)
         self._template = env.from_string(template_text)
 
-    def render(
+    def render_separate(
         self,
         *,
         rule_id: str,
@@ -514,9 +584,10 @@ class JinjaPromptRenderer(PromptRenderer):
         category: str,
         strictness: str,
         project_context: Optional[str],
-    ) -> str:
+    ) -> Tuple[str, str]:
+        """カスタムテンプレートはシステム/ユーザー分離不可のため、全体をユーザープロンプトとして返す。"""
         safe_project_context = project_context or ""
-        return self._template.render(
+        full_prompt = self._template.render(
             rule_id=rule_id,
             summary=summary,
             description=description,
@@ -525,6 +596,7 @@ class JinjaPromptRenderer(PromptRenderer):
             strictness=strictness,
             project_context=safe_project_context,
         )
+        return "", full_prompt
 
 
 def _build_renderer(template_path: Optional[Path]) -> PromptRenderer:
