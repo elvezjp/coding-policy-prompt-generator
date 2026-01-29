@@ -170,6 +170,11 @@ uv run coding-policy-prompt-generator \
 |---|---|---|
 | `--sheet-prefix` | `PROMPT_` | Prefix for detail sheet names |
 | `--template` | Built-in | Prompt template file (Jinja2) |
+| `--strictness` | `strict` | Judgement strictness (`strict` or `lenient`) |
+| `--project-context` | none | Project context string (e.g., "Java 17, Spring Boot 3.x") |
+
+> Note: Custom templates should include `規約ID: <rule_id>` (legacy: `【ルールID】\n<rule_id>`) to keep idempotent updates. If omitted, the tool will warn and may create new sheets on re-run.
+> For Jinja templates, `project_context` is an empty string when unspecified (not `None`).
 
 ---
 
@@ -184,17 +189,12 @@ The tool creates one sheet per rule and writes the prompt body starting at cell 
 ```text
 【SYSTEM PROMPT】
 
+【役割】
 あなたはソフトウェアコードを監査するAIオーディターです。
-以下のルールにのみ基づいてコードを評価してください。
 
-【ルールID】
-N-001
-
-【ルール概要】
-(Content from the "Summary" column in Excel)
-
-【補足】
-(Content from the "Description" column in Excel)
+【目的】
+ユーザープロンプトに与えられる規約に対して、提示されたコードが準拠しているかを判定します。
+規約の内容以外の観点で評価や指摘を行ってはいけません。
 
 【出力形式】
 {
@@ -202,6 +202,38 @@ N-001
   "result": "OK | NG",
   "reason": "日本語で簡潔に"
 }
+
+【注意事項】
+...
+
+【USER PROMPT】
+
+【規約概要】
+規約ID: N-001
+概要: (Content from the "Summary" column in Excel)
+分類: (Content from the "Classification" column in Excel)
+カテゴリ: (Content from the "Category" column in Excel)
+
+【重大度】
+（未記載 - 必要に応じて「必須」「推奨」等を手動で追記）
+
+【詳細ルール】
+(Content from the "Description" column in Excel)
+
+【適用範囲・例外】
+（未記載 - 必要に応じて例外ケースを手動で追記）
+
+【準拠の具体例】
+（未記載）
+
+【違反の具体例】
+（未記載）
+
+【グレーゾーンの具体例】
+（未記載 - 「違反に見えるがOK」「OKに見えるが違反」の例を手動で追記）
+
+【チェック対象コード】
+（ここに対象コードを貼り付け）
 ```
 
 > Note: The built-in template generates prompts in Japanese. Use `--template` to specify a custom template for other languages.

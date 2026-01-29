@@ -85,7 +85,7 @@ def test_nfc_normalization_for_sheet_and_headers(tmp_path: Path) -> None:
     detail_nfc = "PROMPT_N-001"
     detail_nfd = unicode_normalize("NFD", detail_nfc)
     detail_ws = wb.create_sheet(title=detail_nfd)
-    detail_ws["A1"].value = "【ルールID】\nN-001"
+    detail_ws["A1"].value = "規約ID: N-001"
 
     _save_workbook(input_path, wb)
 
@@ -121,6 +121,44 @@ def test_nfc_normalization_for_sheet_and_headers(tmp_path: Path) -> None:
         1 for name in out_wb.sheetnames if unicode_normalize("NFC", name) == detail_nfc
     )
     assert detail_nfc_count == 1
+
+
+def test_legacy_marker_is_accepted_for_updates(tmp_path: Path) -> None:
+    input_path = tmp_path / "legacy_marker_input.xlsx"
+    output_path = tmp_path / "legacy_marker_output.xlsx"
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "一覧"
+    ws.cell(row=1, column=1, value="項番")
+    ws.cell(row=1, column=2, value="概要")
+    ws.cell(row=1, column=3, value="説明")
+    ws.cell(row=2, column=1, value="N-200")
+    ws.cell(row=2, column=2, value="概要")
+
+    legacy_sheet = wb.create_sheet(title="PROMPT_N-200")
+    legacy_sheet["A1"].value = "【ルールID】\nN-200"
+
+    _save_workbook(input_path, wb)
+
+    plan = generate_prompts(
+        input_path=input_path,
+        output_path=output_path,
+        index_sheet="一覧",
+        header_row=1,
+        columns=ColumnConfig(
+            id_column="項番",
+            summary_column="概要",
+            description_column="説明",
+            link_column="説明",
+        ),
+        sheet_prefix="PROMPT_",
+        dry_run=False,
+    )
+
+    assert plan.processed_rules == 1
+    assert plan.created_sheets == []
+    assert plan.updated_sheets == ["PROMPT_N-200"]
 
 
 def test_reject_same_input_output_path(tmp_path: Path) -> None:

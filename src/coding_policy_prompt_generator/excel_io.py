@@ -67,7 +67,19 @@ def generate_prompts(
     sheet_prefix: str,
     dry_run: bool,
     template_path: Optional[Path] = None,
+    strictness: str = "strict",
+    project_context: Optional[str] = None,
 ) -> GenerationPlan:
+    normalized_strictness = strictness.strip().lower()
+    if normalized_strictness not in {"strict", "lenient"}:
+        raise ValueError(f"Invalid strictness: {strictness}. Use 'strict' or 'lenient'.")
+
+    normalized_project_context = project_context
+    if normalized_project_context is not None:
+        normalized_project_context = normalized_project_context.strip()
+        if not normalized_project_context:
+            normalized_project_context = None
+
     workbook = load_workbook(filename=input_path)
     worksheet = _resolve_index_sheet(workbook, index_sheet)
 
@@ -83,6 +95,8 @@ def generate_prompts(
         resolved=resolved,
         sheet_prefix=sheet_prefix,
         renderer=renderer,
+        strictness=normalized_strictness,
+        project_context=normalized_project_context,
         plan=plan,
     )
 
@@ -256,6 +270,8 @@ def _process_rows(
     resolved: ResolvedColumns,
     sheet_prefix: str,
     renderer: "PromptRenderer",
+    strictness: str,
+    project_context: Optional[str],
     plan: GenerationPlan,
 ) -> None:
     for row_idx in range(header_row + 1, worksheet.max_row + 1):
@@ -297,7 +313,17 @@ def _process_rows(
             description=description,
             classification=classification,
             category=category,
+            strictness=strictness,
+            project_context=project_context,
         )
+        markers = _rule_id_markers(rule_id)
+        if not any(marker in prompt for marker in markers):
+            plan.warnings.append(
+                (
+                    f"Row {row_idx} warning: prompt missing rule_id marker; "
+                    "idempotent updates may not work"
+                )
+            )
 
         detail_ws = workbook[sheet_name]
         detail_cell = detail_ws["A1"]
@@ -323,12 +349,12 @@ def _clean_cell(value: object) -> str:
 def _ensure_detail_sheet(workbook: Workbook, sheet_prefix: str, rule_id: str, plan: GenerationPlan) -> Tuple[str, str]:
     base_name = f"{sheet_prefix}{rule_id}"
     normalized_base = _normalize_sheet_name(base_name)
-    marker = _rule_id_marker(rule_id)
+    markers = _rule_id_markers(rule_id)
 
     existing_by_nfc = {_nfc(name): name for name in workbook.sheetnames}
     existing_name = existing_by_nfc.get(_nfc(normalized_base))
     if existing_name:
-        if _sheet_matches_marker(workbook, existing_name, marker):
+        if _sheet_matches_marker(workbook, existing_name, markers):
             plan.updated_sheets.append(existing_name)
             return existing_name, "update"
         plan.warnings.append(
@@ -340,7 +366,7 @@ def _ensure_detail_sheet(workbook: Workbook, sheet_prefix: str, rule_id: str, pl
 
     # Idempotency guard: if the detail sheet was previously created with a suffix
     # due to collisions, try to find it by rule_id marker in A1.
-    matched = _find_existing_detail_sheet_by_marker(workbook, marker)
+    matched = _find_existing_detail_sheet_by_marker(workbook, markers)
     if matched:
         plan.updated_sheets.append(matched)
         return matched, "update"
@@ -392,21 +418,24 @@ def _relaxed_key(text: str) -> str:
     return "".join(ch for ch in folded if ch not in separators)
 
 
-def _rule_id_marker(rule_id: str) -> str:
-    return f"【ルールID】\n{rule_id}"
+def _rule_id_markers(rule_id: str) -> List[str]:
+    return [
+        f"規約ID: {rule_id}",
+        f"【ルールID】\n{rule_id}",
+    ]
 
 
-def _find_existing_detail_sheet_by_marker(workbook: Workbook, marker: str) -> Optional[str]:
+def _find_existing_detail_sheet_by_marker(workbook: Workbook, markers: List[str]) -> Optional[str]:
     for sheet_name in workbook.sheetnames:
-        if _sheet_matches_marker(workbook, sheet_name, marker):
+        if _sheet_matches_marker(workbook, sheet_name, markers):
             return sheet_name
     return None
 
 
-def _sheet_matches_marker(workbook: Workbook, sheet_name: str, marker: str) -> bool:
+def _sheet_matches_marker(workbook: Workbook, sheet_name: str, markers: List[str]) -> bool:
     value = workbook[sheet_name]["A1"].value
-    if isinstance(value, str) and marker in value:
-        return True
+    if isinstance(value, str):
+        return any(marker in value for marker in markers)
     return False
 
 
@@ -419,6 +448,8 @@ class PromptRenderer:
         description: str,
         classification: str,
         category: str,
+        strictness: str,
+        project_context: Optional[str],
     ) -> str:
         raise NotImplementedError
 
@@ -432,6 +463,8 @@ class BuiltinPromptRenderer(PromptRenderer):
         description: str,
         classification: str,
         category: str,
+        strictness: str,
+        project_context: Optional[str],
     ) -> str:
         return _render_prompt(
             rule_id=rule_id,
@@ -439,6 +472,8 @@ class BuiltinPromptRenderer(PromptRenderer):
             description=description,
             classification=classification,
             category=category,
+            strictness=strictness,
+            project_context=project_context,
         )
 
 
@@ -460,13 +495,18 @@ class JinjaPromptRenderer(PromptRenderer):
         description: str,
         classification: str,
         category: str,
+        strictness: str,
+        project_context: Optional[str],
     ) -> str:
+        safe_project_context = project_context or ""
         return self._template.render(
             rule_id=rule_id,
             summary=summary,
             description=description,
             classification=classification,
             category=category,
+            strictness=strictness,
+            project_context=safe_project_context,
         )
 
 
@@ -487,31 +527,83 @@ def _render_prompt(
     description: str,
     classification: str,
     category: str,
+    strictness: str,
+    project_context: Optional[str],
 ) -> str:
     description_block = description if description else "（補足なし）"
     classification_block = classification if classification else "（未指定）"
     category_block = category if category else "（未指定）"
+    strictness_line = _strictness_line(strictness)
+    project_context_block = _project_context_block(project_context)
     return (
         "【SYSTEM PROMPT】\n\n"
-        "あなたはソフトウェアコードを監査するAIオーディターです。\n"
-        "以下のルールにのみ基づいてコードを評価してください。\n\n"
-        "【ルールID】\n"
-        f"{rule_id}\n\n"
-        "【分類】\n"
-        f"{classification_block}\n\n"
-        "【カテゴリ】\n"
-        f"{category_block}\n\n"
-        "【ルール概要】\n"
-        f"{summary}\n\n"
-        "【補足】\n"
-        f"{description_block}\n\n"
+        "【役割】\n"
+        "あなたはソフトウェアコードを監査するAIオーディターです。\n\n"
+        "【目的】\n"
+        "ユーザープロンプトに与えられる規約に対して、提示されたコードが準拠しているかを判定します。\n"
+        "規約の内容以外の観点で評価や指摘を行ってはいけません。\n\n"
+        f"{project_context_block}"
         "【出力形式】\n"
         "{\n"
         f"  \"rule_id\": \"{rule_id}\",\n"
         "  \"result\": \"OK | NG\",\n"
         "  \"reason\": \"日本語で簡潔に\"\n"
-        "}\n"
+        "}\n\n"
+        "【注意事項】\n"
+        "- 規約文から「対象」「判断基準」「許容/禁止」「例外」「混在時の扱い」を推論し、明示的に解釈して判定する。\n"
+        f"- {strictness_line}\n"
+        "- 不完全なコードや情報不足の場合は、不足点を理由に記載したうえで、可能な範囲で判定する。\n"
+        "- 判定不能な場合は result を \"NG\" とし、reason に判定不能の理由を記載する。\n"
+        "- 出力は上記JSON形式のみとし、余計な文章を付けない。\n\n"
+        "【USER PROMPT】\n\n"
+        "【規約概要】\n"
+        f"規約ID: {rule_id}\n"
+        f"概要: {summary}\n"
+        f"分類: {classification_block}\n"
+        f"カテゴリ: {category_block}\n\n"
+        "【重大度】\n"
+        "（未記載）\n"
+        "記入例: 必須 - ビルドエラーの原因となる / 推奨 - 可読性に影響 / 任意 - スタイル統一のため\n\n"
+        "【詳細ルール】\n"
+        f"{description_block}\n\n"
+        "【適用範囲・例外】\n"
+        "（未記載）\n"
+        "記入例:\n"
+        "- 対象: クラス名、インターフェース名\n"
+        "- 除外: テストコード、自動生成コード、外部ライブラリ由来の名前\n\n"
+        "【準拠の具体例】\n"
+        "（未記載）\n"
+        "記入例:\n"
+        "// OK: PascalCase\n"
+        "public class UserAccount { }\n"
+        "public class OrderService { }\n\n"
+        "【違反の具体例】\n"
+        "（未記載）\n"
+        "記入例:\n"
+        "// NG: 先頭小文字\n"
+        "public class userAccount { }\n"
+        "// NG: スネークケース\n"
+        "public class User_Account { }\n\n"
+        "【グレーゾーンの具体例】\n"
+        "（未記載）\n"
+        "記入例:\n"
+        "- OKに見えるがNG: `HTTPClient` → 正しくは `HttpClient`\n"
+        "- NGに見えるがOK: `XMLParser` → 略語の連続は許容される場合あり（プロジェクト方針による）\n\n"
+        "【チェック対象コード】\n"
+        "（ここに対象コードを貼り付け）\n"
     )
+
+
+def _strictness_line(strictness: str) -> str:
+    if strictness == "lenient":
+        return "【厳格度: lenient】明らかな違反のみNG、疑わしい場合はOKとし、理由に懸念点を記載する。"
+    return "【厳格度: strict】疑わしい場合は違反（NG）として判定し、理由に曖昧さを記載する。"
+
+
+def _project_context_block(project_context: Optional[str]) -> str:
+    if not project_context:
+        return ""
+    return f"【プロジェクト前提】\n{project_context}\n\n"
 
 
 def _hyperlink_formula(sheet_name: str, label: str = "詳細") -> str:
