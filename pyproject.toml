@@ -2,18 +2,49 @@
 name = "coding-policy-prompt-generator"
 version = "0.2.0"
 description = "Generate AI auditor system prompts from coding policy Excel files."
-readme = "README_ja.md"
+readme = "README.md"
 requires-python = ">=3.10"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [
+  { name = "Elvez, Inc.", email = "info@elvez.co.jp" },
+]
+keywords = [
+  "coding-policy",
+  "prompt-generator",
+  "ai-auditor",
+  "code-review",
+  "excel",
+  "jinja2",
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Software Development :: Code Generators",
+  "Topic :: Software Development :: Quality Assurance",
+]
 dependencies = [
   "openpyxl>=3.1.0",
   "jinja2>=3.1.0",
 ]
 
+[project.urls]
+Homepage = "https://github.com/elvezjp/coding-policy-prompt-generator"
+Repository = "https://github.com/elvezjp/coding-policy-prompt-generator"
+Issues = "https://github.com/elvezjp/coding-policy-prompt-generator/issues"
+Changelog = "https://github.com/elvezjp/coding-policy-prompt-generator/blob/main/CHANGELOG.md"
+
 [project.scripts]
 coding-policy-prompt-generator = "coding_policy_prompt_generator.cli:main"
 
 [build-system]
-requires = ["setuptools>=61.0"]
+requires = ["setuptools>=77.0"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.package-data]
