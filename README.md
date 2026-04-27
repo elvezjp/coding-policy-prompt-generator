@@ -5,7 +5,7 @@
 [![Elvez](https://img.shields.io/badge/Elvez-Product-3F61A7?style=flat-square)](https://elvez.co.jp/)
 [![IXV Ecosystem](https://img.shields.io/badge/IXV-Ecosystem-3F61A7?style=flat-square)](https://elvez.co.jp/ixv/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)](./LICENSE)
-[![Python](https://img.shields.io/badge/Python-3.9+-blue?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
+[![Python](https://img.shields.io/badge/Python-3.10+-blue?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
 [![Stars](https://img.shields.io/github/stars/elvezjp/coding-policy-prompt-generator?style=social)](https://github.com/elvezjp/coding-policy-prompt-generator/stargazers)
 
 A CLI tool that reads an Excel-based coding policy (1 row = 1 rule), automatically generates **rule-level prompts (System Prompts) for an AI auditor**, and expands them into "detail sheets" inside the same workbook.
@@ -56,7 +56,7 @@ IXV addresses challenges in understanding, structuring, and utilizing Japanese d
 
 ### Requirements
 
-- Python 3.9 or higher
+- Python 3.10 or higher
 - `uv` package manager (recommended)
 
 ### Install Dependencies
