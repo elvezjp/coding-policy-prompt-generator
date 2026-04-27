@@ -1,159 +1,161 @@
-# coding-policy-prompt-generator への貢献
+# Contributing to coding-policy-prompt-generator
 
-coding-policy-prompt-generator への貢献に興味をお持ちいただきありがとうございます！このドキュメントでは、本プロジェクトへの貢献方法を説明します。
+[English](./CONTRIBUTING.md) | [日本語](./CONTRIBUTING_ja.md)
 
-## 貢献の方法
+Thank you for your interest in contributing to coding-policy-prompt-generator! This document describes how to contribute to the project.
 
-### 1. バグの報告
+## How to Contribute
 
-バグを発見した場合は、以下の情報を含めて Issue を作成してください：
+### 1. Reporting Bugs
 
-- **明確で説明的なタイトル**
-- **問題を再現する手順**
-- **期待される動作**
-- **実際の動作**
-- **サンプル Excel ファイル**（該当する場合、機密情報は削除してください）
-- **バージョン情報**：
-  - coding-policy-prompt-generator のバージョン
-  - Python のバージョン
+When you find a bug, please open an issue with the following information:
+
+- **Clear, descriptive title**
+- **Steps to reproduce the problem**
+- **Expected behavior**
+- **Actual behavior**
+- **Sample Excel file** (if applicable; please remove any sensitive information)
+- **Version information**:
+  - coding-policy-prompt-generator version
+  - Python version
   - OS
 
-### 2. 機能改善の提案
+### 2. Proposing Enhancements
 
-機能提案の場合は、以下の情報を含めて Issue を作成してください：
+For feature proposals, please open an issue with the following information:
 
-- **明確で説明的なタイトル**
-- **提案する機能の詳細な説明**
-- **ユースケースとメリット**
-- **例やモックアップ**（該当する場合）
+- **Clear, descriptive title**
+- **Detailed description of the proposed feature**
+- **Use cases and benefits**
+- **Examples or mockups** (if applicable)
 
-### 3. プルリクエスト
+### 3. Pull Requests
 
-プルリクエストを歓迎します！以下の手順に従ってください。
+Pull requests are welcome! Please follow the steps below.
 
-## 開発環境のセットアップ
+## Setting Up the Development Environment
 
-### 前提条件
+### Prerequisites
 
-- Python 3.10 以上
-- `uv` パッケージマネージャ
+- Python 3.10 or higher
+- The `uv` package manager
 
-### インストール手順
+### Installation
 
 ```bash
-# リポジトリをクローン
-git clone https://github.com/elvez-inc/coding-policy-prompt-generator.git
+# Clone the repository
+git clone https://github.com/elvezjp/coding-policy-prompt-generator.git
 cd coding-policy-prompt-generator
 
-# uv のインストール（未導入の場合）
+# Install uv (if not already installed)
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# 依存関係のインストール（開発用依存関係を含む）
+# Install dependencies (including dev dependencies)
 uv sync --dev
 ```
 
-### インストールの確認
+### Verifying the Installation
 
 ```bash
-# テストの実行
+# Run tests
 uv run pytest
 
-# CLI の実行
+# Run the CLI
 uv run coding-policy-prompt-generator --help
 ```
 
-## テストの実行
+## Running Tests
 
-### 全テストの実行
+### Run All Tests
 
 ```bash
 uv run pytest
 ```
 
-### 特定のテストファイルの実行
+### Run a Specific Test File
 
 ```bash
-uv run pytest tests/test_m1_smoke.py
+uv run pytest tests/test_basic_functionality.py
 ```
 
-### カバレッジ付きテストの実行
+### Run Tests with Coverage
 
 ```bash
 uv run pytest --cov=src/coding_policy_prompt_generator --cov-report=html
 ```
 
-## プルリクエストの手順
+## Pull Request Workflow
 
-### 1. フォークとブランチの作成
+### 1. Fork and Create a Branch
 
 ```bash
-# GitHub でリポジトリをフォークし、フォークをクローン
+# Fork the repository on GitHub, then clone your fork
 git clone https://github.com/YOUR_USERNAME/coding-policy-prompt-generator.git
 cd coding-policy-prompt-generator
 
-# フィーチャーブランチを作成
-# ブランチ命名規則: {ユーザー名}/{YYYYMMDD}-{内容}
+# Create a feature branch
+# Branch naming convention: {username}/{YYYYMMDD}-{description}
 git checkout -b your-username/20260128-add-new-feature
 ```
 
-### 2. コーディングスタイルへの準拠
+### 2. Coding Style
 
-本プロジェクトは [PEP 8](https://peps.python.org/pep-0008/) スタイルガイドに従っています。
+This project follows the [PEP 8](https://peps.python.org/pep-0008/) style guide.
 
-- インデントには 4 スペースを使用
-- 最大行長: 88 文字（Black のデフォルト）
-- 適切な場所で型ヒントを使用
+- Use 4 spaces for indentation
+- Maximum line length: 88 characters (Black default)
+- Use type hints where appropriate
 
-#### 命名規則
+#### Naming Conventions
 
-- 変数と関数: `snake_case`
-- クラス: `PascalCase`
-- 定数: `UPPER_SNAKE_CASE`
-- プライベートメンバー: `_leading_underscore`
+- Variables and functions: `snake_case`
+- Classes: `PascalCase`
+- Constants: `UPPER_SNAKE_CASE`
+- Private members: `_leading_underscore`
 
-#### ドキュメント
+#### Documentation
 
-- パブリック関数とクラスには docstring を追加
-- Google スタイルの docstring を使用
+- Add docstrings to public functions and classes
+- Use Google-style docstrings
 
 ```python
 def process_rule(rule_id: str, summary: str) -> dict:
-    """単一のルールを処理し、プロンプトデータを生成します。
+    """Process a single rule and produce prompt data.
 
     Args:
-        rule_id: ルールの一意識別子。
-        summary: ルールの概要テキスト。
+        rule_id: Unique identifier of the rule.
+        summary: Summary text of the rule.
 
     Returns:
-        処理されたルールデータを含む辞書。
+        A dict containing the processed rule data.
 
     Raises:
-        ValueError: rule_id が空の場合。
+        ValueError: If rule_id is empty.
     """
 ```
 
-### 3. テストの作成
+### 3. Writing Tests
 
-- 新機能にはテストを追加してください
-- 既存のテストがパスすることを確認してください
-- テストファイルは `tests/` ディレクトリに配置してください
+- Add tests for new features
+- Make sure existing tests still pass
+- Place test files under the `tests/` directory
 
 ```bash
-# コミット前にテストを実行
+# Run tests before committing
 uv run pytest
 ```
 
-### 4. ドキュメントの更新
+### 4. Updating Documentation
 
-必要に応じて以下を更新してください：
+Update the following as needed:
 
-- `README.md` / `README_ja.md` - 新機能や使い方の変更
-- `CHANGELOG.md` - "Unreleased" セクションにエントリを追加
-- docstring - コード変更に対応
+- `README.md` / `README_ja.md` — new features or usage changes
+- `CHANGELOG.md` / `CHANGELOG_ja.md` — add an entry to the "Unreleased" section
+- Docstrings — keep them in sync with code changes
 
-### 5. コミットメッセージのルール
+### 5. Commit Message Convention
 
-以下の形式に従ってください：
+Follow this format:
 
 ```
 <type>: <subject>
@@ -163,94 +165,93 @@ uv run pytest
 <footer>
 ```
 
-#### タイプ
+#### Types
 
-- `feat`: 新機能
-- `fix`: バグ修正
-- `docs`: ドキュメントの変更
-- `style`: フォーマット（コード変更なし）
-- `refactor`: コードのリファクタリング
-- `test`: テストの追加・更新
-- `chore`: メンテナンスタスク
+- `feat`: New feature
+- `fix`: Bug fix
+- `docs`: Documentation changes
+- `style`: Formatting (no code change)
+- `refactor`: Code refactoring
+- `test`: Adding or updating tests
+- `chore`: Maintenance tasks
 
-#### 例
+#### Examples
 
-良い例：
+Good:
 ```
-feat: カスタムテンプレート変数のサポートを追加
+feat: support custom template variables
 
---extra-vars オプションを通じて Jinja2 テンプレートに
-追加の変数を渡せるようになりました。
+Allow passing extra variables to Jinja2 templates
+via the --extra-vars option.
 
 Closes #123
 ```
 
 ```
-fix: 概要列の空セルの処理を修正
+fix: handle empty cells in the summary column
 
-以前は空白のみのセルが有効なルールとして処理されていました。
-現在は警告を出力して適切にスキップされます。
-```
-
-悪い例：
-```
-バグ修正
+Previously, whitespace-only cells were processed as
+valid rules. They are now skipped with a warning.
 ```
 
+Bad:
 ```
-コード更新
+bug fix
 ```
 
-### 6. プッシュとプルリクエストの作成
+```
+update code
+```
+
+### 6. Push and Open a Pull Request
 
 ```bash
-# ブランチをプッシュ
+# Push your branch
 git push -u origin your-username/20260128-add-new-feature
 ```
 
-GitHub でプルリクエストを作成し、以下を含めてください：
+When opening a pull request on GitHub, please include:
 
-- 変更内容を説明する明確なタイトル
-- 何が変更されたか、なぜ変更されたかの説明
-- 関連する Issue への参照（例: "Closes #123"）
+- A clear title describing the change
+- An explanation of what changed and why
+- References to related issues (e.g., "Closes #123")
 
-### 7. レビュープロセス
+### 7. Review Process
 
-- メンテナーからのコードレビューをお待ちください
-- フィードバックに対応し、追加のコミットをプッシュしてください
-- 承認されたら、メンテナーが PR をマージします
+- Wait for code review from a maintainer
+- Address feedback and push additional commits
+- Once approved, a maintainer will merge the PR
 
-## 送信前チェックリスト
+## Pre-submission Checklist
 
-プルリクエストを送信する前に、以下を確認してください：
+Before submitting a pull request, please confirm:
 
-- [ ] すべてのテストがパスする（`uv run pytest`）
-- [ ] コードが PEP 8 スタイルガイドラインに従っている
-- [ ] 新機能には対応するテストがある
-- [ ] ドキュメントが更新されている
-- [ ] コミットメッセージが規則に従っている
-- [ ] ブランチが main と同期されている
+- [ ] All tests pass (`uv run pytest`)
+- [ ] Code follows the PEP 8 style guidelines
+- [ ] New features have corresponding tests
+- [ ] Documentation has been updated
+- [ ] Commit messages follow the convention
+- [ ] The branch is up to date with main
 
-## コードレビューのガイドライン
+## Code Review Guidelines
 
-レビューでは以下に焦点を当てます：
+Reviews focus on:
 
-- 正確性と機能性
-- テストカバレッジ
-- コードの可読性と保守性
-- プロジェクトの規則への準拠
-- ドキュメントの品質
+- Correctness and functionality
+- Test coverage
+- Readability and maintainability
+- Adherence to project conventions
+- Documentation quality
 
-## コミュニティガイドライン
+## Community Guidelines
 
-- 敬意を持って建設的に
-- [行動規範](./CODE_OF_CONDUCT.md) に従ってください
-- 不明な点があれば質問してください
-- 可能な範囲で他の人を助けてください
+- Be respectful and constructive
+- Ask questions when something is unclear
+- Help others when you can
 
-## 質問がありますか？
+## Questions?
 
-- `question` ラベルを付けて Issue を作成してください
+- Open an issue with the `question` label
 - Email: info@elvez.co.jp
 
-貢献いただきありがとうございます！
+Thank you for contributing!
