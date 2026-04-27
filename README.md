@@ -44,9 +44,9 @@ IXV addresses challenges in understanding, structuring, and utilizing Japanese d
 
 ## Documents
 
-- [CHANGELOG.md](CHANGELOG.md) - Version history
-- [CONTRIBUTING.md](CONTRIBUTING.md) - Contribution guide
-- [SECURITY.md](SECURITY.md) - Security policy
+- Changelog: [English](CHANGELOG.md) / [日本語](CHANGELOG_ja.md) — version history
+- Contributing: [English](CONTRIBUTING.md) / [日本語](CONTRIBUTING_ja.md) — contribution guide
+- Security policy: [English](SECURITY.md) / [日本語](SECURITY_ja.md)
 - [spec.md](spec.md) - Technical specification
 - [Sample Files](docs/ai-auditor-format/) - Sample Excel (input/output)
 
@@ -274,12 +274,15 @@ coding-policy-prompt-generator/
 ├── docs/                   # Documentation and samples
 ├── src/                    # Source code
 ├── tests/                  # Test code
-├── CHANGELOG.md            # Version history
-├── CONTRIBUTING.md         # Contribution guide
+├── CHANGELOG.md            # Version history (English)
+├── CHANGELOG_ja.md         # Version history (Japanese)
+├── CONTRIBUTING.md         # Contribution guide (English)
+├── CONTRIBUTING_ja.md      # Contribution guide (Japanese)
 ├── LICENSE                 # License
 ├── README.md               # README (English)
 ├── README_ja.md            # README (Japanese)
-├── SECURITY.md             # Security policy
+├── SECURITY.md             # Security policy (English)
+├── SECURITY_ja.md          # Security policy (Japanese)
 ├── pyproject.toml          # Project configuration
 └── spec.md                 # Technical specification
 ```

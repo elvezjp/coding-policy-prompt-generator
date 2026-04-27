@@ -1,51 +1,53 @@
-# 変更履歴
+# Changelog
 
-このプロジェクトにおける注目すべき変更はすべてこのファイルに記録されます。
+[English](./CHANGELOG.md) | [日本語](./CHANGELOG_ja.md)
 
-このファイルの形式は [Keep a Changelog](https://keepachangelog.com/ja/1.0.0/) に基づいており、
-このプロジェクトは [セマンティックバージョニング](https://semver.org/lang/ja/) に準拠しています。
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [0.2.0] - 2026-04-27
 
-### 変更（破壊的）
+### Changed (Breaking)
 
-- サポート対象 Python バージョンを **3.10 以上** に引き上げ（Python 3.9 のサポート終了）
-- CI マトリクスの Python バージョンを `["3.10", "3.13"]` に更新
+- Raised the minimum supported Python version to **3.10** (Python 3.9 support dropped)
+- Updated the CI matrix Python versions to `["3.10", "3.13"]`
 
-### 修正
+### Fixed
 
-- `pytest` を `9.0.3` 以上に更新（CVE-2025-71176 / GHSA-6w46-j5rx-g56g, Dependabot #2 解消）
-- `Pygments` を `2.20.0` 以上に更新（CVE-2026-4539 / GHSA-5239-wwwm-4pmq, Dependabot #1 解消）
+- Bumped `pytest` to `9.0.3` or later (resolves CVE-2025-71176 / GHSA-6w46-j5rx-g56g, Dependabot #2)
+- Bumped `Pygments` to `2.20.0` or later (resolves CVE-2026-4539 / GHSA-5239-wwwm-4pmq, Dependabot #1)
 
 ## [0.1.0] - 2026-01-29
 
-### 追加
+### Added
 
-- Excelベースのコーディング規約をAIオーディター向けプロンプトに変換する初期CLI実装（`coding-policy-prompt-generator`）
-- 日本語ヘッダーの揺れに対応したNFC正規化と柔軟なマッチングによる列解決機能
-- ルールIDマーカーによる冪等な詳細シート処理（再実行時のデータ損失を防止）
-- 自動サフィックス生成によるシート名衝突の安全対策
-- ファイルを変更せずに変更内容をプレビューする `--dry-run` オプション
-- カスタムプロンプトテンプレート用のJinja2ベース `--template` サポート
-- 判定の厳格度を指定する `--strictness` オプション（`strict` / `lenient`）
-- プロジェクト前提情報を指定する `--project-context` オプション
-- 詳細シートの2セル分割出力（A1: システムプロンプト、A2: ユーザープロンプト）
-- デフォルトテンプレートの外部ファイル化（`templates/system_prompt.j2`, `user_prompt.j2`）
-- ユーザープロンプトの新セクション（重大度、適用範囲・例外、グレーゾーンの具体例）
-- 以下をカバーする包括的なテストスイート：
-  - 空行・不完全な行のスキップルール
-  - 日本語テキストのNFC正規化
-  - シート名の衝突
-  - 列解決のエッジケース
+- Initial CLI implementation (`coding-policy-prompt-generator`) that converts Excel-based coding policies into prompts for AI auditors
+- Column resolution with NFC normalization and flexible matching to handle Japanese header variations
+- Idempotent detail-sheet processing using rule-ID markers (prevents data loss on re-runs)
+- Sheet-name collision protection via automatic suffix generation
+- `--dry-run` option to preview changes without modifying the file
+- Jinja2-based `--template` support for custom prompt templates
+- `--strictness` option to control judgement strictness (`strict` / `lenient`)
+- `--project-context` option to specify project preconditions
+- Two-cell detail-sheet output (A1: system prompt, A2: user prompt)
+- Externalized default templates (`templates/system_prompt.j2`, `templates/user_prompt.j2`)
+- New user-prompt sections: severity, scope/exceptions, gray-zone examples
+- Comprehensive test suite covering:
+  - Skip rules for empty/incomplete rows
+  - NFC normalization of Japanese text
+  - Sheet-name collisions
+  - Column-resolution edge cases
 
-### 技術詳細
+### Technical Notes
 
-- Excelファイル操作に `openpyxl` を使用
-- テンプレートエンジンに `jinja2` を使用
-- Python 3.9+ をサポート（v0.2.0 で 3.10+ に引き上げ）
-- `uv` によるパッケージ管理
+- Uses `openpyxl` for Excel manipulation
+- Uses `jinja2` for the template engine
+- Supports Python 3.9+ (raised to 3.10+ in v0.2.0)
+- Package management via `uv`
 
-## リンク
+## Links
 
-- リポジトリ: https://github.com/elvezjp/coding-policy-prompt-generator
-- Issue トラッカー: https://github.com/elvezjp/coding-policy-prompt-generator/issues
+- Repository: https://github.com/elvezjp/coding-policy-prompt-generator
+- Issue tracker: https://github.com/elvezjp/coding-policy-prompt-generator/issues

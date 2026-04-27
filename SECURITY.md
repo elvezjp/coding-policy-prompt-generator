@@ -1,125 +1,129 @@
-# セキュリティポリシー
+# Security Policy
 
-このドキュメントは coding-policy-prompt-generator のセキュリティポリシーを説明します。
+[English](./SECURITY.md) | [日本語](./SECURITY_ja.md)
 
-## サポートバージョン
+This document describes the security policy for coding-policy-prompt-generator.
 
-以下のバージョンがセキュリティアップデートの対象です：
+## Supported Versions
 
-| バージョン | サポート状況       |
-| ---------- | ------------------ |
-| 0.2.x      | :white_check_mark: |
-| 0.1.x      | :x:                |
-| < 0.1      | :x:                |
+The following versions are eligible for security updates:
 
-常に最新バージョンの使用を推奨します。
+| Version | Supported          |
+| ------- | ------------------ |
+| 0.2.x   | :white_check_mark: |
+| 0.1.x   | :x:                |
+| < 0.1   | :x:                |
 
-## 脆弱性の報告
+We recommend always using the latest release.
 
-**セキュリティ脆弱性については、公開の Issue を作成しないでください。**
+## Reporting a Vulnerability
 
-### 報告方法
+**Please do not open a public issue for security vulnerabilities.**
 
-以下のいずれかの方法でセキュリティ脆弱性を報告してください：
+### How to Report
 
-1. **GitHub Security Advisory**（推奨）
-   - [GitHub のプライベートセキュリティアドバイザリ機能](https://github.com/elvez-inc/coding-policy-prompt-generator/security/advisories/new)を使用してください
+Please report security vulnerabilities through one of the following channels:
 
-2. **メール**
-   - 送信先: info@elvez.co.jp
-   - 件名: `[SECURITY] coding-policy-prompt-generator 脆弱性報告`
+1. **GitHub Security Advisory** (recommended)
+   - Use the [GitHub private security advisory feature](https://github.com/elvezjp/coding-policy-prompt-generator/security/advisories/new).
 
-### 報告に含める情報
+2. **Email**
+   - To: info@elvez.co.jp
+   - Subject: `[SECURITY] coding-policy-prompt-generator vulnerability report`
 
-報告には以下の情報を含めてください：
+### Information to Include
 
-- 脆弱性の説明
-- 問題を再現する手順
-- 潜在的な影響と重大度
-- 修正案や緩和策の提案（可能であれば）
-- 連絡先情報（任意）
+Please include the following details in your report:
 
-### 報告例
+- Description of the vulnerability
+- Steps to reproduce the issue
+- Potential impact and severity
+- Suggested fix or mitigation (if any)
+- Contact information (optional)
+
+### Example Report
 
 ```
-件名: [SECURITY] 任意ファイル読み取りの脆弱性
+Subject: [SECURITY] Arbitrary file read vulnerability
 
-説明:
-入力ファイル処理にパストラバーサルの脆弱性があり、任意のファイルを読み取ることができます。
+Description:
+The input-file handler is vulnerable to path traversal,
+allowing arbitrary files to be read.
 
-再現手順:
-1. パスフィールドに "../../../etc/passwd" を含む Excel ファイルを作成
-2. 実行: uv run coding-policy-prompt-generator malicious.xlsx
-3. 出力にファイル内容が露出することを確認
+Steps to reproduce:
+1. Create an Excel file containing "../../../etc/passwd" in a path field.
+2. Run: uv run coding-policy-prompt-generator malicious.xlsx
+3. Observe that file contents are exposed in the output.
 
-影響:
-攻撃者は細工した Excel ファイルを通じてシステム上の機密ファイルを読み取る可能性があります。
+Impact:
+A crafted Excel file could allow an attacker to read sensitive
+files on the system.
 
-重大度: 高
+Severity: High
 
-修正案:
-ファイルパスを処理前に検証・サニタイズしてください。
+Suggested fix:
+Validate and sanitize file paths before processing.
 ```
 
-## 対応スケジュール
+## Response Timeline
 
-- **初回応答**: 48時間以内
-- **状況更新**: 7日以内
-- **解決**: 重大度に応じて
-  - 緊急: 14日以内
-  - 高: 30日以内
-  - 中: 60日以内
-  - 低: 次回リリースサイクル
+- **Initial response**: within 48 hours
+- **Status updates**: within 7 days
+- **Resolution**: depending on severity
+  - Critical: within 14 days
+  - High: within 30 days
+  - Medium: within 60 days
+  - Low: in the next release cycle
 
-## セキュリティに関する考慮事項
+## Security Considerations
 
-### ファイル処理
+### File Handling
 
-- 信頼できるソースからの Excel ファイル（.xlsx）のみを処理してください
-- VBA マクロ（.xlsm）は実行されません
-- パストラバーサル攻撃を防ぐためファイルパスを検証します
+- Process Excel files (.xlsx) only from trusted sources
+- VBA macros (.xlsm) are not executed
+- File paths are validated to prevent path traversal
 
-### 入力検証
+### Input Validation
 
-- ユーザー指定の列名はサニタイズされます
-- シート名は Excel の制約（31文字、禁止文字）に対して検証されます
-- ヘッダーの比較は NFC 正規化を使用します
+- User-supplied column names are sanitized
+- Sheet names are validated against Excel constraints (31-character limit, forbidden characters)
+- Header comparisons use NFC normalization
 
-### 出力のセキュリティ
+### Output Security
 
-- 生成されるプロンプトとハイパーリンクはプレーンテキストとして保存されます
-- ルール一覧に機密データを含めないでください
-- 出力ファイルは入力のセキュリティコンテキストを継承します
+- Generated prompts and hyperlinks are stored as plain text
+- Do not include sensitive data in the rule list
+- Output files inherit the security context of the input
 
-### 依存関係のセキュリティ
+### Dependency Security
 
-- 依存関係は `uv` と `pyproject.toml` で管理されています
-- Dependabot を使用して脆弱な依存関係を監視しています
-- セキュリティアップデートは迅速に適用されます
+- Dependencies are managed by `uv` and `pyproject.toml`
+- Vulnerable dependencies are monitored via Dependabot
+- Security updates are applied promptly
 
-## セキュリティのベストプラクティス
+## Security Best Practices
 
-本ツールを使用する際は、以下を推奨します：
+When using this tool, we recommend:
 
-1. **最新バージョンを使用** - 常に最新リリースに更新してください
-2. **入力ファイルを確認** - 信頼できるソースからの Excel ファイルのみを処理してください
-3. **生成された出力を確認** - 外部に共有する前に出力を確認してください
-4. **サンドボックス環境を使用** - 信頼できない入力に対しては隔離された環境で実行してください
-5. **依存関係を監視** - 依存関係を最新に保ってください
+1. **Use the latest version** — keep up to date with the most recent release
+2. **Verify input files** — only process Excel files from trusted sources
+3. **Review generated output** — review output before sharing it externally
+4. **Use a sandbox** — run on isolated environments for untrusted input
+5. **Monitor dependencies** — keep dependencies up to date
 
-## 既知のセキュリティ制限
+## Known Security Limitations
 
-- 本ツールはユーザー提供の Excel ファイルを処理します。不正な形式のファイルは予期しない動作を引き起こす可能性があります
-- 生成されるプロンプトには機密のルール情報が含まれる場合があります。出力を適切に扱ってください
-- 信頼できないソースからのテンプレートファイル（Jinja2）は任意のコードを実行する可能性があります
+- This tool processes user-supplied Excel files; malformed files may cause unexpected behavior
+- Generated prompts may include sensitive rule information; handle output appropriately
+- Template files (Jinja2) from untrusted sources may execute arbitrary code
 
-## 問い合わせ先
+## Contact
 
-脆弱性ではないセキュリティ関連の質問について：
+For non-vulnerability security questions:
 
-- `security` ラベルを付けて Issue を作成してください
+- Open an issue with the `security` label
 - Email: info@elvez.co.jp
 
-## 謝辞
+## Acknowledgements
 
-本プロジェクトのセキュリティ向上に貢献してくださるセキュリティ研究者の皆様に感謝いたします。有効なセキュリティ問題を報告してくださった方は、許可を得た上でここに記載させていただきます。
+We thank the security researchers who help improve the security of this project. With permission, we will credit anyone who reports a valid security issue here.
