@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Bumped `pytest` to `9.0.3` or later (resolves CVE-2025-71176 / GHSA-6w46-j5rx-g56g, Dependabot #2)
-- Bumped `Pygments` to `2.20.0` or later (resolves CVE-2026-4539 / GHSA-5239-wwwm-4pmq, Dependabot #1)
+- Resolved `Pygments` to `2.20.0` or later transitively via the `pytest` upgrade (CVE-2026-4539 / GHSA-5239-wwwm-4pmq, Dependabot #1). `Pygments` is not a direct dependency.
 
 ## [0.1.0] - 2026-01-29
 

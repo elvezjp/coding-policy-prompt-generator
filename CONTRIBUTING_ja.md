@@ -75,7 +75,7 @@ uv run pytest
 ### 特定のテストファイルの実行
 
 ```bash
-uv run pytest tests/test_m1_smoke.py
+uv run pytest tests/test_basic_functionality.py
 ```
 
 ### カバレッジ付きテストの実行

@@ -75,7 +75,7 @@ uv run pytest
 ### Run a Specific Test File
 
 ```bash
-uv run pytest tests/test_m1_smoke.py
+uv run pytest tests/test_basic_functionality.py
 ```
 
 ### Run Tests with Coverage

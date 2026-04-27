@@ -17,7 +17,7 @@
 ### 修正
 
 - `pytest` を `9.0.3` 以上に更新（CVE-2025-71176 / GHSA-6w46-j5rx-g56g, Dependabot #2 解消）
-- `Pygments` を `2.20.0` 以上に更新（CVE-2026-4539 / GHSA-5239-wwwm-4pmq, Dependabot #1 解消）
+- `pytest` の更新に伴い `Pygments` を `2.20.0` 以上に解決（CVE-2026-4539 / GHSA-5239-wwwm-4pmq, Dependabot #1 解消）。`Pygments` は直接依存ではありません。
 
 ## [0.1.0] - 2026-01-29
 
