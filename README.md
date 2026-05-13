@@ -25,9 +25,9 @@ A CLI tool that reads an Excel-based coding policy (1 row = 1 rule), automatical
 
 ## Background
 
-This tool is a small utility born during the development of **IXV**, an AI assistant for Japanese development documents and specifications.
+This tool was created during the development of **IXV**, an AI development ecosystem designed for Japanese engineering teams.
 
-IXV addresses challenges in understanding, structuring, and utilizing Japanese documents in software development. This repository provides a standalone component from that ecosystem.
+IXV delivers a methodology and OSS that put AI to practical use in real development workflows. This repository publishes a portion of that work.
 
 ---
 
