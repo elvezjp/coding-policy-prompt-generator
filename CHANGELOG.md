@@ -7,6 +7,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.1] - 2026-05-14
+
+### Fixed
+
+- Read merged-cell values correctly for the classification, category, and description columns. Previously, rows other than the top-left of a merged range produced empty values and rendered as "(unspecified)" in prompts ([#4](https://github.com/elvezjp/coding-policy-prompt-generator/issues/4)).
+- Unmerge all merged ranges on the index sheet before rebuilding it; otherwise rebuilding fails with `AttributeError: 'MergedCell' object attribute 'value' is read-only`.
+
+### Added
+
+- `versions/` directory with frozen per-release snapshots (`src/`, `tests/`, `spec.md`, `pyproject.toml`, `uv.lock`). The first archived snapshot is `versions/v0.2.0/`.
+- Test cases covering classification / category / description merged cells, the top-left cell of a merged range, empty cells outside any merged range, and a no-merge regression case.
+
 ## [0.2.0] - 2026-04-27
 
 ### Changed (Breaking)

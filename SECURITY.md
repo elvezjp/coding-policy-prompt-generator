@@ -81,11 +81,11 @@ Validate and sanitize file paths before processing.
 
 - Process Excel files (.xlsx) only from trusted sources
 - VBA macros (.xlsm) are not executed
-- File paths are validated to prevent path traversal
+- The CLI processes the input, output, and template paths explicitly provided by the user
 
 ### Input Validation
 
-- User-supplied column names are sanitized
+- User-supplied column names are normalized before matching
 - Sheet names are validated against Excel constraints (31-character limit, forbidden characters)
 - Header comparisons use NFC normalization
 

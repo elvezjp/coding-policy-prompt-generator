@@ -284,11 +284,6 @@ def _suggest_headers(headers: HeaderContext, name: str) -> List[str]:
 
 def _rebuild_index_sheet(worksheet: Worksheet, rules: List[RuleData]) -> None:
     """一覧シートをAIオーディター形式で再構築する。"""
-    # 結合セルがあるとクリア時に MergedCell の value が read-only で書き換えられないため、
-    # 先にすべての結合範囲を解除する。
-    for merged_range in list(worksheet.merged_cells.ranges):
-        worksheet.unmerge_cells(str(merged_range))
-
     # 既存データをクリア
     for row in worksheet.iter_rows():
         for cell in row:
@@ -355,15 +350,15 @@ def _process_rows(
 
         description = ""
         if resolved.description_col:
-            description = _clean_cell(_get_merged_cell_value(worksheet, row_idx, resolved.description_col))
+            description = _clean_cell(worksheet.cell(row=row_idx, column=resolved.description_col).value)
 
         classification = ""
         if resolved.classification_col:
-            classification = _clean_cell(_get_merged_cell_value(worksheet, row_idx, resolved.classification_col))
+            classification = _clean_cell(worksheet.cell(row=row_idx, column=resolved.classification_col).value)
 
         category = ""
         if resolved.category_col:
-            category = _clean_cell(_get_merged_cell_value(worksheet, row_idx, resolved.category_col))
+            category = _clean_cell(worksheet.cell(row=row_idx, column=resolved.category_col).value)
 
         sheet_name, action_kind = _ensure_detail_sheet(workbook, sheet_prefix, rule_id, plan)
         system_prompt, user_prompt = renderer.render_separate(
@@ -417,24 +412,6 @@ def _clean_cell(value: object) -> str:
     if value is None:
         return ""
     return str(value).strip()
-
-
-def _get_merged_cell_value(worksheet: Worksheet, row: int, col: int) -> object:
-    """結合セルを考慮して値を取得する。
-
-    対象セルが値を持たず、かつ結合範囲に含まれる場合、結合元（左上）セルの値を返す。
-    """
-    cell = worksheet.cell(row=row, column=col)
-    if cell.value is not None:
-        return cell.value
-
-    for merged_range in worksheet.merged_cells.ranges:
-        if cell.coordinate in merged_range:
-            return worksheet.cell(
-                row=merged_range.min_row,
-                column=merged_range.min_col,
-            ).value
-    return None
 
 
 def _ensure_detail_sheet(workbook: Workbook, sheet_prefix: str, rule_id: str, plan: GenerationPlan) -> Tuple[str, str]:

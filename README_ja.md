@@ -48,7 +48,7 @@ IXVでは、開発方法論とOSSを提供することで、AI活用を現場に
 - コントリビューションガイド: [English](CONTRIBUTING.md) / [日本語](CONTRIBUTING_ja.md)
 - セキュリティポリシー: [English](SECURITY.md) / [日本語](SECURITY_ja.md)
 - [spec.md](spec.md) - 技術仕様書
-- [入出力サンプル](docs/ai-auditor-format/) - サンプルExcel（入力・出力）
+- [入出力サンプル](docs/examples/) - バージョン別サンプルExcel（入力・出力）
 
 ---
 
@@ -95,7 +95,7 @@ uv run coding-policy-prompt-generator input.xlsx
 | N-002 | 命名規則 | メソッド | メソッド名はcamelCaseとする | 例: getUserName, calculateTotal |
 | N-003 | コメント | 全般 | publicメソッドにはJavadocを記述する | @param, @return, @throwsを含める |
 
-> または、`docs/ai-auditor-format/` にあるサンプルExcelを編集して使用することもできます。
+> または、`docs/examples/<バージョン>/` にあるサンプルExcelを編集して使用することもできます。
 
 ### 使用例
 
@@ -135,7 +135,7 @@ uv run coding-policy-prompt-generator rules.xlsx --dry-run
 
 ```bash
 uv run coding-policy-prompt-generator \
-  docs/ai-auditor-format/20260121AIオーディター形式サンプルコーディング規約.xlsx \
+  docs/examples/<latest>/20260121AIオーディター形式サンプルコーディング規約.xlsx \
   --index-sheet "コーディング規約一覧" \
   --header-row 3 \
   --link-column "説明"
@@ -261,9 +261,9 @@ uv run coding-policy-prompt-generator \
 
 ### サンプルExcel
 
-以下のサンプルをベースに実装・検証を進めています。
+バージョン別のサンプルは [`docs/examples/`](docs/examples/) 配下に格納しています。実装・検証は最新バージョンのディレクトリを使用してください。
 
-- `docs/ai-auditor-format/20260121AIオーディター形式サンプルコーディング規約.xlsx`
+- `docs/examples/<最新バージョン>/20260121AIオーディター形式サンプルコーディング規約.xlsx`
 
 ---
 
@@ -274,6 +274,7 @@ coding-policy-prompt-generator/
 ├── docs/                   # ドキュメント・サンプル
 ├── src/                    # ソースコード
 ├── tests/                  # テストコード
+├── versions/               # リリースごとのスナップショット（過去バージョンのアーカイブ）
 ├── CHANGELOG.md            # バージョン履歴（英語）
 ├── CHANGELOG_ja.md         # バージョン履歴（日本語）
 ├── CONTRIBUTING.md         # コントリビューションガイド（英語）
