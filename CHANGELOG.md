@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `versions/` directory with frozen per-release snapshots (`src/`, `spec.md`, `pyproject.toml`, `uv.lock`). The first archived snapshot is `versions/v0.2.0/`.
+- `versions/` directory with frozen per-release snapshots (`src/`, `tests/`, `spec.md`, `pyproject.toml`, `uv.lock`). The first archived snapshot is `versions/v0.2.0/`.
 - Test cases covering classification / category / description merged cells, the top-left cell of a merged range, empty cells outside any merged range, and a no-merge regression case.
 
 ## [0.2.0] - 2026-04-27
