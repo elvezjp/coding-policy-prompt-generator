@@ -274,6 +274,7 @@ coding-policy-prompt-generator/
 ├── docs/                   # ドキュメント・サンプル
 ├── src/                    # ソースコード
 ├── tests/                  # テストコード
+├── versions/               # リリースごとのスナップショット（過去バージョンのアーカイブ）
 ├── CHANGELOG.md            # バージョン履歴（英語）
 ├── CHANGELOG_ja.md         # バージョン履歴（日本語）
 ├── CONTRIBUTING.md         # コントリビューションガイド（英語）
