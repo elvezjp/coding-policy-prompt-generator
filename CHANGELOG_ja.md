@@ -7,6 +7,18 @@
 このファイルの形式は [Keep a Changelog](https://keepachangelog.com/ja/1.0.0/) に基づいており、
 このプロジェクトは [セマンティックバージョニング](https://semver.org/lang/ja/) に準拠しています。
 
+## [0.2.1] - 2026-05-14
+
+### 修正
+
+- 分類列・カテゴリ列・説明列でセル結合された値を正しく取得するよう修正。従来は結合範囲の左上以外の行が空となり、プロンプトに「（未指定）」と出力されていた（[#4](https://github.com/elvezjp/coding-policy-prompt-generator/issues/4)）。
+- 一覧シート再構築時に既存の結合範囲をすべて解除するよう修正。未解除のままだと `AttributeError: 'MergedCell' object attribute 'value' is read-only` で再構築に失敗していた。
+
+### 追加
+
+- リリースごとのスナップショットを保存する `versions/` ディレクトリを追加（`src/`、`spec.md`、`pyproject.toml`、`uv.lock`）。最初のスナップショットとして `versions/v0.2.0/` を格納。
+- 結合セル対応のテストケースを追加（分類／カテゴリ／説明列の結合、結合範囲の左上セル、結合範囲外の空セル、結合なしのリグレッション）。
+
 ## [0.2.0] - 2026-04-27
 
 ### 変更（破壊的）
