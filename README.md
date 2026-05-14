@@ -48,7 +48,7 @@ IXV delivers a methodology and OSS that put AI to practical use in real developm
 - Contributing: [English](CONTRIBUTING.md) / [日本語](CONTRIBUTING_ja.md) — contribution guide
 - Security policy: [English](SECURITY.md) / [日本語](SECURITY_ja.md)
 - [spec.md](spec.md) - Technical specification
-- [Sample Files](docs/ai-auditor-format/) - Sample Excel (input/output)
+- [Sample Files](docs/examples/) - Sample Excel (input/output) per release
 
 ---
 
@@ -95,7 +95,7 @@ This reads `input.xlsx` and generates a **prompt-expanded workbook** in the same
 | N-002 | Naming | Method | Method names should use camelCase | e.g., getUserName, calculateTotal |
 | N-003 | Comments | General | Public methods must have Javadoc | Include @param, @return, @throws |
 
-> Alternatively, you can edit and use the sample Excel file in `docs/ai-auditor-format/`.
+> Alternatively, you can edit and use the sample Excel file in `docs/examples/<version>/`.
 
 ### Examples
 
@@ -135,7 +135,7 @@ uv run coding-policy-prompt-generator rules.xlsx --dry-run
 
 ```bash
 uv run coding-policy-prompt-generator \
-  docs/ai-auditor-format/20260121AIオーディター形式サンプルコーディング規約.xlsx \
+  docs/examples/v0.2.1/20260121AIオーディター形式サンプルコーディング規約.xlsx \
   --index-sheet "コーディング規約一覧" \
   --header-row 3 \
   --link-column "説明"
@@ -263,7 +263,7 @@ The tool creates one sheet per rule and outputs the prompt body.
 
 The following sample workbook is used for implementation and verification:
 
-- `docs/ai-auditor-format/20260121AIオーディター形式サンプルコーディング規約.xlsx`
+- `docs/examples/v0.2.1/20260121AIオーディター形式サンプルコーディング規約.xlsx`
 
 ---
 

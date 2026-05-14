@@ -115,7 +115,7 @@
 
 ### 3.3 サンプルExcelへの適合要件
 
-対象: `docs/ai-auditor-format/20260121AIオーディター形式サンプルコーディング規約.xlsx`
+対象: `docs/examples/v0.2.1/20260121AIオーディター形式サンプルコーディング規約.xlsx`
 
 サンプルの特徴に合わせ、次を満たすこと。
 
@@ -554,12 +554,12 @@ Excelのセル縦幅には上限があるため、プロンプト全文がセル
 #### 実行手順
 
 1. サンプルファイルを準備する
-   - `docs/ai-auditor-format/20260121AIオーディター形式サンプルコーディング規約.xlsx`
+   - `docs/examples/v0.2.1/20260121AIオーディター形式サンプルコーディング規約.xlsx`
 
 2. CLIを実行する
    ```bash
    uv run coding-policy-prompt-generator \
-     docs/ai-auditor-format/20260121AIオーディター形式サンプルコーディング規約.xlsx \
+     docs/examples/v0.2.1/20260121AIオーディター形式サンプルコーディング規約.xlsx \
      --index-sheet "コーディング規約一覧" \
      --header-row 3 \
      --link-column "説明"
