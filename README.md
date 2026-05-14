@@ -135,7 +135,7 @@ uv run coding-policy-prompt-generator rules.xlsx --dry-run
 
 ```bash
 uv run coding-policy-prompt-generator \
-  docs/examples/v0.2.1/20260121AIオーディター形式サンプルコーディング規約.xlsx \
+  docs/examples/<latest>/20260121AIオーディター形式サンプルコーディング規約.xlsx \
   --index-sheet "コーディング規約一覧" \
   --header-row 3 \
   --link-column "説明"
@@ -261,9 +261,9 @@ The tool creates one sheet per rule and outputs the prompt body.
 
 ### Sample Excel
 
-The following sample workbook is used for implementation and verification:
+The sample workbooks for each release live under [`docs/examples/`](docs/examples/). Use the latest version directory for implementation and verification:
 
-- `docs/examples/v0.2.1/20260121AIオーディター形式サンプルコーディング規約.xlsx`
+- `docs/examples/<latest>/20260121AIオーディター形式サンプルコーディング規約.xlsx`
 
 ---
 

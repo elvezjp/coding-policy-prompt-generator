@@ -135,7 +135,7 @@ uv run coding-policy-prompt-generator rules.xlsx --dry-run
 
 ```bash
 uv run coding-policy-prompt-generator \
-  docs/examples/v0.2.1/20260121AIオーディター形式サンプルコーディング規約.xlsx \
+  docs/examples/<latest>/20260121AIオーディター形式サンプルコーディング規約.xlsx \
   --index-sheet "コーディング規約一覧" \
   --header-row 3 \
   --link-column "説明"
@@ -261,9 +261,9 @@ uv run coding-policy-prompt-generator \
 
 ### サンプルExcel
 
-以下のサンプルをベースに実装・検証を進めています。
+バージョン別のサンプルは [`docs/examples/`](docs/examples/) 配下に格納しています。実装・検証は最新バージョンのディレクトリを使用してください。
 
-- `docs/examples/v0.2.1/20260121AIオーディター形式サンプルコーディング規約.xlsx`
+- `docs/examples/<最新バージョン>/20260121AIオーディター形式サンプルコーディング規約.xlsx`
 
 ---
 
