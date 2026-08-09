@@ -310,10 +310,11 @@ def _rebuild_index_sheet(worksheet: Worksheet, rules: List[RuleData]) -> None:
     # Row 4+: データ行
     for i, rule in enumerate(rules):
         row_idx = AI_AUDITOR_DATA_START_ROW + i
-        worksheet.cell(row=row_idx, column=1, value=rule.rule_id)
-        worksheet.cell(row=row_idx, column=2, value=rule.classification)
-        worksheet.cell(row=row_idx, column=3, value=rule.category)
-        worksheet.cell(row=row_idx, column=4, value=rule.summary)
+        # これらは入力 Excel のセル値そのもの。数式として解釈させない。
+        _write_text_cell(worksheet, row_idx, 1, rule.rule_id)
+        _write_text_cell(worksheet, row_idx, 2, rule.classification)
+        _write_text_cell(worksheet, row_idx, 3, rule.category)
+        _write_text_cell(worksheet, row_idx, 4, rule.summary)
         # 列5（説明）にハイパーリンクを設定（descriptionは詳細シートに記載されるため上書き）
         link_cell = worksheet.cell(row=row_idx, column=5, value=_hyperlink_formula(rule.sheet_name))
         link_cell.font = Font(color="0000FF", underline="single")
@@ -388,12 +389,12 @@ def _process_rows(
 
         detail_ws = workbook[sheet_name]
         # A1: システムプロンプト（カスタムテンプレートの場合は空）
-        cell_a1 = detail_ws["A1"]
-        cell_a1.value = system_prompt if system_prompt else user_prompt
+        # プロンプトは入力由来の値を埋め込んで生成されるため、
+        # 先頭が "=" になった場合に数式化しないようテキストに固定する。
+        cell_a1 = _write_text_cell(detail_ws, 1, 1, system_prompt if system_prompt else user_prompt)
         cell_a1.alignment = Alignment(wrap_text=True, vertical="top")
         # A2: ユーザープロンプト（カスタムテンプレートの場合はA1に全文出力されるため空）
-        cell_a2 = detail_ws["A2"]
-        cell_a2.value = user_prompt if system_prompt else ""
+        cell_a2 = _write_text_cell(detail_ws, 2, 1, user_prompt if system_prompt else "")
         cell_a2.alignment = Alignment(wrap_text=True, vertical="top")
         detail_ws.column_dimensions["A"].width = 80
 
@@ -632,7 +633,34 @@ def _build_renderer(template_path: Optional[Path]) -> PromptRenderer:
     return JinjaPromptRenderer(template_text)
 
 
+def _write_text_cell(worksheet: Worksheet, row: int, column: int, value: object):
+    """入力由来の値を、数式ではなくテキストとして書き込む。
+
+    openpyxl は先頭が "=" の文字列を数式（data_type="f"）として書き出す。
+    入力 Excel のセル値をそのまま転記すると、生成されたワークブックを
+    開いた利用者の環境で数式が評価される（CWE-1236）。
+    値そのものは変えず、型だけテキストに固定する。
+    """
+    cell = worksheet.cell(row=row, column=column, value=value)
+    if isinstance(value, str):
+        cell.data_type = "s"
+    return cell
+
+
+def _escape_formula_string(value: str) -> str:
+    """Excel 数式の文字列リテラルに埋め込めるようエスケープする。
+
+    数式内の文字列リテラルでは、二重引用符を重ねて表記する。
+    エスケープしないと、値の中の `"` でリテラルを抜け出せてしまう。
+    """
+    return value.replace('"', '""')
+
+
 def _hyperlink_formula(sheet_name: str, label: str = "詳細") -> str:
     # Excel internal link to A1 of the detail sheet.
-    safe_sheet_name = sheet_name.replace("'", "''")
-    return f"=HYPERLINK(\"#'{safe_sheet_name}'!A1\",\"{label}\")"
+    # シート名は単一引用符で囲むため `'` を重ね、さらに数式の文字列
+    # リテラルに入れるため `"` も重ねる。両方を行わないと、シート名
+    # （入力の rule_id 由来）から数式を組み立てられる。
+    safe_sheet_name = _escape_formula_string(sheet_name.replace("'", "''"))
+    safe_label = _escape_formula_string(label)
+    return f"=HYPERLINK(\"#'{safe_sheet_name}'!A1\",\"{safe_label}\")"
